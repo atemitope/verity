@@ -1,0 +1,959 @@
+{
+  "meta": {
+    "name": "insights_interpretable_db",
+    "version": "1.1.0",
+    "created_utc": "2026-02-28T08:39:23.032327Z",
+    "notes": [
+      "This is a human-interpretable trait library + unmoderated questionnaire + scoring rules inspired by the public-facing concepts of Insights Discovery colour energies.",
+      "It is NOT the proprietary Insights Discovery Preference Evaluator, and does not replicate proprietary scoring keys or item wording.",
+      "v1.1 adds gamification design spec, a report template modelled on an Insights-style team report, and generation rules for higher-quality narrative outputs."
+    ]
+  },
+  "scales": {
+    "likert_1_5": {
+      "labels": {
+        "1": "Strongly disagree",
+        "2": "Disagree",
+        "3": "Neutral",
+        "4": "Agree",
+        "5": "Strongly agree"
+      },
+      "to_points": {
+        "method": "subtract_1",
+        "range_points": [
+          0,
+          4
+        ]
+      }
+    },
+    "forced_choice": {
+      "options": [
+        "A",
+        "B"
+      ],
+      "points_awarded": 4
+    }
+  },
+  "colours": {
+    "cool_blue": {
+      "display_name": "Cool Blue",
+      "core_drive": "accuracy, understanding, quality, control of risk",
+      "typical_behaviours": [
+        "Defines criteria, checks assumptions, asks for evidence",
+        "Structures work into processes, standards, documentation",
+        "Notices inconsistencies, spots defects, improves systems"
+      ],
+      "communication_cues": [
+        "Precise language, measured tone, preference for written detail",
+        "Asks: What’s the data, what’s the definition, what’s the risk"
+      ],
+      "strengths": [
+        "Rigour, objectivity, critical thinking, quality assurance",
+        "Planning, governance, troubleshooting, compliance"
+      ],
+      "blind_spots": [
+        "Over-analyses, delays decisions, appears critical or distant",
+        "Undervalues emotion, morale, and informal networks"
+      ],
+      "under_pressure": [
+        "More controlling, detail-focused, risk-averse, perfectionistic"
+      ],
+      "best_environment": [
+        "Clear standards, time to think, access to data, logical debate"
+      ],
+      "how_to_work_with": [
+        "Bring evidence, define the decision, agree criteria, give time to reflect"
+      ]
+    },
+    "earth_green": {
+      "display_name": "Earth Green",
+      "core_drive": "harmony, trust, values, care, sustainable pace",
+      "typical_behaviours": [
+        "Builds rapport, checks impact on people, seeks inclusion",
+        "Listens, supports, develops others, mediates conflict",
+        "Prefers steady progress and shared ownership"
+      ],
+      "communication_cues": [
+        "Warm tone, patient pacing",
+        "Asks: How will this land, who is affected"
+      ],
+      "strengths": [
+        "Coaching, collaboration, relationship repair, team culture",
+        "Stakeholder care, retention, long-term cohesion"
+      ],
+      "blind_spots": [
+        "Avoids conflict, softens messages, tolerates poor performance too long",
+        "Prioritises consensus over speed and clarity"
+      ],
+      "under_pressure": [
+        "More accommodating, reassurance-seeking, or withdraws to protect relationships"
+      ],
+      "best_environment": [
+        "Psychological safety, time for consultation, clear values, respectful dialogue"
+      ],
+      "how_to_work_with": [
+        "Show empathy, explain people impact, invite input, avoid public confrontation"
+      ]
+    },
+    "sunshine_yellow": {
+      "display_name": "Sunshine Yellow",
+      "core_drive": "connection, possibility, optimism, influence, variety",
+      "typical_behaviours": [
+        "Generates ideas, spots opportunities, enjoys experimentation",
+        "Networks, motivates, tells stories, builds momentum through energy",
+        "Likes flexibility, dislikes routine"
+      ],
+      "communication_cues": [
+        "Expressive, informal, future-oriented",
+        "Asks: What’s possible, what’s the big picture"
+      ],
+      "strengths": [
+        "Creativity, persuasion, change energy, engagement, brainstorming",
+        "Vision, marketing, innovation, stakeholder enthusiasm"
+      ],
+      "blind_spots": [
+        "Lacks follow-through, skips details, over-promises, gets distracted",
+        "Talks more than listens when excited"
+      ],
+      "under_pressure": [
+        "More talkative, restless, scattered, seeks stimulation via interaction"
+      ],
+      "best_environment": [
+        "Autonomy, variety, social contact, room for experimentation"
+      ],
+      "how_to_work_with": [
+        "Start with the vision, keep it interactive, agree next steps and owners in writing"
+      ]
+    },
+    "fiery_red": {
+      "display_name": "Fiery Red",
+      "core_drive": "results, action, autonomy, challenge, speed",
+      "typical_behaviours": [
+        "Makes fast decisions, pushes through obstacles, takes charge",
+        "Comfortable with disagreement, sets ambitious targets",
+        "Focuses on outcomes, efficiency, performance"
+      ],
+      "communication_cues": [
+        "Direct, concise, assertive",
+        "Asks: What’s the goal, what are we doing now"
+      ],
+      "strengths": [
+        "Decisiveness, execution, negotiating, driving change, crisis response",
+        "Accountability, prioritisation, momentum"
+      ],
+      "blind_spots": [
+        "Blunt, impatient, dismissive when under time pressure",
+        "Under-invests in consultation, nuance, or relationship repair"
+      ],
+      "under_pressure": [
+        "More forceful, impatient, controlling, escalates conflict to move forward"
+      ],
+      "best_environment": [
+        "Clear goals, autonomy, fast feedback loops, measurable outcomes"
+      ],
+      "how_to_work_with": [
+        "Be brief and prepared, propose options, agree decisions and deadlines, avoid waffle"
+      ]
+    }
+  },
+  "combination_blurbs": [
+    {
+      "top_two": [
+        "fiery_red",
+        "cool_blue"
+      ],
+      "label": "Red–Blue",
+      "blurb": "Decisive and rigorous. Drives outcomes with logic, can be blunt and demanding."
+    },
+    {
+      "top_two": [
+        "fiery_red",
+        "sunshine_yellow"
+      ],
+      "label": "Red–Yellow",
+      "blurb": "Fast and influential. Energises action, can skip detail and over-commit."
+    },
+    {
+      "top_two": [
+        "fiery_red",
+        "earth_green"
+      ],
+      "label": "Red–Green",
+      "blurb": "Protective leader. Pushes for results while caring for people, can feel torn between speed and harmony."
+    },
+    {
+      "top_two": [
+        "cool_blue",
+        "earth_green"
+      ],
+      "label": "Blue–Green",
+      "blurb": "Thoughtful and considerate. High standards plus empathy, can deliberate and avoid hard calls."
+    },
+    {
+      "top_two": [
+        "cool_blue",
+        "sunshine_yellow"
+      ],
+      "label": "Blue–Yellow",
+      "blurb": "Curious analyst. Ideas plus logic, can oscillate between exploration and critique."
+    },
+    {
+      "top_two": [
+        "earth_green",
+        "sunshine_yellow"
+      ],
+      "label": "Green–Yellow",
+      "blurb": "Supportive connector. Builds community and enthusiasm, can avoid confrontation and drift from priorities."
+    }
+  ],
+  "interpretation_rules": {
+    "primary_secondary": {
+      "definition": "Highest score is dominant energy; second highest is secondary energy. Use to generate narrative: default gear plus accessible alternative gear."
+    },
+    "balance_vs_intensity": {
+      "range_thresholds": {
+        "flat_profile": 1.0,
+        "moderate": 2.5
+      },
+      "guidance": {
+        "flat_profile": "Scores cluster tightly. Interpret cautiously. Validate with behaviour checks.",
+        "moderate": "Some clear preferences. Interpret with normal confidence.",
+        "high": "Strong preferences. Easier to predict. Watch for interpersonal friction in low-energy areas."
+      }
+    },
+    "polarities": {
+      "red_vs_green": {
+        "definition": "Task and pace versus people and harmony",
+        "metric": "fiery_red_score - earth_green_score"
+      },
+      "blue_vs_yellow": {
+        "definition": "Precision and analysis versus spontaneity and enthusiasm",
+        "metric": "cool_blue_score - sunshine_yellow_score"
+      }
+    }
+  },
+  "questionnaire": {
+    "id": "unmoderated_v1",
+    "title": "Workplace behaviour preferences questionnaire (colour energies)",
+    "instructions": [
+      "Answer based on how you typically behave at work, not how you want to be.",
+      "Use the last 4 weeks as your reference period.",
+      "Do not overthink. If unsure, pick your default."
+    ],
+    "items": [
+      {
+        "id": 1,
+        "type": "likert_1_5",
+        "text": "I prefer decisions backed by data and clear criteria.",
+        "maps_to": {
+          "cool_blue": 1.0
+        }
+      },
+      {
+        "id": 2,
+        "type": "likert_1_5",
+        "text": "I enjoy turning messy problems into structured plans.",
+        "maps_to": {
+          "cool_blue": 1.0
+        }
+      },
+      {
+        "id": 3,
+        "type": "likert_1_5",
+        "text": "I notice errors and inconsistencies quickly.",
+        "maps_to": {
+          "cool_blue": 1.0
+        }
+      },
+      {
+        "id": 4,
+        "type": "likert_1_5",
+        "text": "I feel satisfied when standards and procedures are followed.",
+        "maps_to": {
+          "cool_blue": 1.0
+        }
+      },
+      {
+        "id": 5,
+        "type": "likert_1_5",
+        "text": "I check in on how people are coping before pushing the work forward.",
+        "maps_to": {
+          "earth_green": 1.0
+        }
+      },
+      {
+        "id": 6,
+        "type": "likert_1_5",
+        "text": "I adjust my approach to preserve relationships.",
+        "maps_to": {
+          "earth_green": 1.0
+        }
+      },
+      {
+        "id": 7,
+        "type": "likert_1_5",
+        "text": "I listen for what is not being said and respond with care.",
+        "maps_to": {
+          "earth_green": 1.0
+        }
+      },
+      {
+        "id": 8,
+        "type": "likert_1_5",
+        "text": "I prefer decisions that protect team cohesion even if they take longer.",
+        "maps_to": {
+          "earth_green": 1.0
+        }
+      },
+      {
+        "id": 9,
+        "type": "likert_1_5",
+        "text": "I energise groups by sharing possibilities and ideas.",
+        "maps_to": {
+          "sunshine_yellow": 1.0
+        }
+      },
+      {
+        "id": 10,
+        "type": "likert_1_5",
+        "text": "I like variety and get bored with repetition.",
+        "maps_to": {
+          "sunshine_yellow": 1.0
+        }
+      },
+      {
+        "id": 11,
+        "type": "likert_1_5",
+        "text": "I persuade through enthusiasm and a compelling narrative.",
+        "maps_to": {
+          "sunshine_yellow": 1.0
+        }
+      },
+      {
+        "id": 12,
+        "type": "likert_1_5",
+        "text": "I think out loud and use conversation to generate options.",
+        "maps_to": {
+          "sunshine_yellow": 1.0
+        }
+      },
+      {
+        "id": 13,
+        "type": "likert_1_5",
+        "text": "I get to the point quickly and expect others to do the same.",
+        "maps_to": {
+          "fiery_red": 1.0
+        }
+      },
+      {
+        "id": 14,
+        "type": "likert_1_5",
+        "text": "I am comfortable challenging others directly when needed.",
+        "maps_to": {
+          "fiery_red": 1.0
+        }
+      },
+      {
+        "id": 15,
+        "type": "likert_1_5",
+        "text": "I prioritise speed of execution over perfect information.",
+        "maps_to": {
+          "fiery_red": 1.0
+        }
+      },
+      {
+        "id": 16,
+        "type": "likert_1_5",
+        "text": "I take charge naturally when the goal is clear.",
+        "maps_to": {
+          "fiery_red": 1.0
+        }
+      },
+      {
+        "id": 17,
+        "type": "likert_1_5",
+        "text": "Under pressure, I become more focused on logic, details, and control.",
+        "maps_to": {
+          "cool_blue": 1.0
+        }
+      },
+      {
+        "id": 18,
+        "type": "likert_1_5",
+        "text": "Under pressure, I become more focused on people’s needs and reassurance.",
+        "maps_to": {
+          "earth_green": 1.0
+        }
+      },
+      {
+        "id": 19,
+        "type": "likert_1_5",
+        "text": "Under pressure, I become more upbeat, talkative, and idea driven.",
+        "maps_to": {
+          "sunshine_yellow": 1.0
+        }
+      },
+      {
+        "id": 20,
+        "type": "likert_1_5",
+        "text": "Under pressure, I become more forceful, decisive, and impatient with delays.",
+        "maps_to": {
+          "fiery_red": 1.0
+        }
+      },
+      {
+        "id": 21,
+        "type": "likert_1_5",
+        "text": "I prefer written communication that is precise and complete.",
+        "maps_to": {
+          "cool_blue": 1.0
+        }
+      },
+      {
+        "id": 22,
+        "type": "likert_1_5",
+        "text": "I prefer communication that is warm, personal, and considerate.",
+        "maps_to": {
+          "earth_green": 1.0
+        }
+      },
+      {
+        "id": 23,
+        "type": "likert_1_5",
+        "text": "I prefer communication that is lively, expressive, and informal.",
+        "maps_to": {
+          "sunshine_yellow": 1.0
+        }
+      },
+      {
+        "id": 24,
+        "type": "likert_1_5",
+        "text": "I prefer communication that is brief, direct, and action oriented.",
+        "maps_to": {
+          "fiery_red": 1.0
+        }
+      },
+      {
+        "id": 25,
+        "type": "forced_choice",
+        "text": "A: I would rather be respected for competence than liked for friendliness.  B: I would rather be liked for friendliness than respected for competence.",
+        "choices": {
+          "A": {
+            "cool_blue": 1.0
+          },
+          "B": {
+            "earth_green": 1.0
+          }
+        }
+      },
+      {
+        "id": 26,
+        "type": "forced_choice",
+        "text": "A: I push for a decision even if not everyone agrees.  B: I hold the decision to build agreement.",
+        "choices": {
+          "A": {
+            "fiery_red": 1.0
+          },
+          "B": {
+            "earth_green": 1.0
+          }
+        }
+      },
+      {
+        "id": 27,
+        "type": "forced_choice",
+        "text": "A: I enjoy debating to test ideas.  B: I avoid debate if it risks tension.",
+        "choices": {
+          "A": {
+            "cool_blue": 1.0
+          },
+          "B": {
+            "earth_green": 1.0
+          }
+        }
+      },
+      {
+        "id": 28,
+        "type": "forced_choice",
+        "text": "A: I prefer a clear plan before starting.  B: I prefer to start and adapt as I go.",
+        "choices": {
+          "A": {
+            "cool_blue": 1.0
+          },
+          "B": {
+            "sunshine_yellow": 1.0
+          }
+        }
+      },
+      {
+        "id": 29,
+        "type": "forced_choice",
+        "text": "A: I focus on outcomes and results first.  B: I focus on people and impact first.",
+        "choices": {
+          "A": {
+            "fiery_red": 1.0
+          },
+          "B": {
+            "earth_green": 1.0
+          }
+        }
+      },
+      {
+        "id": 30,
+        "type": "forced_choice",
+        "text": "A: I keep meetings tight and task focused.  B: I keep meetings open to explore and connect.",
+        "choices": {
+          "A": {
+            "fiery_red": 1.0
+          },
+          "B": {
+            "sunshine_yellow": 1.0
+          }
+        }
+      },
+      {
+        "id": 31,
+        "type": "forced_choice",
+        "text": "A: I value accuracy and quality over speed.  B: I value speed and momentum over accuracy.",
+        "choices": {
+          "A": {
+            "cool_blue": 1.0
+          },
+          "B": {
+            "fiery_red": 1.0
+          }
+        }
+      },
+      {
+        "id": 32,
+        "type": "forced_choice",
+        "text": "A: I want facts and options.  B: I want reassurance and alignment.",
+        "choices": {
+          "A": {
+            "cool_blue": 1.0
+          },
+          "B": {
+            "earth_green": 1.0
+          }
+        }
+      }
+    ]
+  },
+  "scoring": {
+    "colour_keys": [
+      "cool_blue",
+      "earth_green",
+      "sunshine_yellow",
+      "fiery_red"
+    ],
+    "normalisation": {
+      "target_range": [
+        0,
+        6
+      ],
+      "method": "6 * raw_points / max_points_per_colour"
+    },
+    "derived_metrics": {
+      "dominant_colour": "argmax(scores)",
+      "secondary_colour": "second_highest(scores)",
+      "top_gap": "max(scores) - second_max(scores)",
+      "range": "max(scores) - min(scores)",
+      "balance_index": "1 - (range / 6)",
+      "polarity_red_green": "fiery_red - earth_green",
+      "polarity_blue_yellow": "cool_blue - sunshine_yellow"
+    },
+    "confidence": {
+      "definition": "Confidence in the mapping based on signal strength (spread and top gap) plus forced-choice alignment. Not verification against proprietary systems.",
+      "formula": {
+        "spread": "max(scores) - min(scores)",
+        "top_gap": "max(scores) - second_max(scores)",
+        "forced_alignment": "forced_choices_supporting_top2 / total_forced_choices",
+        "confidence_raw": "20 + 25*spread + 25*top_gap + 30*forced_alignment",
+        "flat_penalty_if_spread_below": 1.0,
+        "flat_penalty": 15,
+        "confidence": "clamp(confidence_raw - (spread<1?flat_penalty:0), 0, 100)"
+      }
+    }
+  },
+  "output_templates": {
+    "summary": {
+      "fields": [
+        "dominant_colour",
+        "secondary_colour",
+        "scores_0_to_6",
+        "range",
+        "top_gap",
+        "polarity_red_green",
+        "polarity_blue_yellow",
+        "confidence_0_to_100"
+      ],
+      "narrative_rules": [
+        "Use dominant_colour core_drive and strengths as the opening.",
+        "Add secondary_colour as the accessible alternative gear.",
+        "Add one combination_blurb matching the top two colours (order-insensitive).",
+        "Add 2 blind_spots: one from dominant_colour and one from lowest-scoring colour.",
+        "Add under_pressure cues for dominant_colour.",
+        "Generate 3 next_steps: one behaviour to amplify, one to mitigate, one experiment for 2 weeks."
+      ]
+    },
+    "next_steps_library": {
+      "cool_blue": [
+        "Pre-commit decision criteria and a time-box to avoid analysis paralysis.",
+        "Translate your conclusions into a simple one-page action plan for others.",
+        "Ask explicitly for the people-impact risks so you do not miss them."
+      ],
+      "earth_green": [
+        "Practise giving one clear, direct message per week without cushioning.",
+        "Time-box consensus: consult, decide, communicate, then revisit after delivery.",
+        "Use written decision logs to reduce ambiguity and prevent drift."
+      ],
+      "sunshine_yellow": [
+        "Convert ideas into numbered options with owners and dates within 24 hours.",
+        "Schedule a weekly ‘close-out’ slot to finish what you start.",
+        "Ask for a ‘what could go wrong’ review before committing publicly."
+      ],
+      "fiery_red": [
+        "Add a short consultation step: who is affected and what is the risk.",
+        "Replace urgency with clarity: define outcome, constraints, and next milestone.",
+        "Practise one ‘slow down to speed up’ decision per week: criteria then commit."
+      ]
+    }
+  },
+  "app_spec": {
+    "minimum_features": [
+      "User accounts or anonymous sessions",
+      "Questionnaire runner with progress, save/resume",
+      "Scoring engine producing 0–6 colour spectrum + derived metrics + confidence score",
+      "Human-readable report: traits, strengths, blind spots, under pressure, advice, next steps",
+      "Export: JSON and PDF (optional)",
+      "Admin view: aggregated, anonymised analytics (optional)",
+      "Gamified progression: XP, levels, badges, quests, challenges (opt-in)",
+      "Two modes: Individual report and Team report (team mode optional)",
+      "Reflection prompts and behaviour experiment tracker (14-day)",
+      "Achievements screen and challenge library by colour"
+    ],
+    "data_model_suggestion": {
+      "entities": [
+        "user",
+        "assessment",
+        "response",
+        "result",
+        "report"
+      ]
+    }
+  },
+  "gamification": {
+    "principles": [
+      {
+        "name": "Visible progress",
+        "why": "Users stay engaged when they can see progress and proximity to milestones.",
+        "mechanics": [
+          "progress bar",
+          "level",
+          "milestones at 25/50/75/100% completion"
+        ],
+        "implementation_notes": [
+          "Show progress on every screen (header).",
+          "Use milestone celebrations at 25%, 50%, 75%, 100%."
+        ]
+      },
+      {
+        "name": "Commitment loops",
+        "why": "Short, repeatable loops create habit and reduce drop-off.",
+        "mechanics": [
+          "streaks",
+          "weekly goals",
+          "reminders"
+        ],
+        "implementation_notes": [
+          "Offer a 7-day goal and a streak counter for completing micro-actions (e.g., 'review your top energy' daily).",
+          "Allow limited 'streak protection' tokens to reduce catastrophic failure (optional)."
+        ],
+        "source_examples": [
+          "Duolingo streaks (industry pattern, treat as speculative unless you adopt official sources)"
+        ]
+      },
+      {
+        "name": "Challenges and trophies",
+        "why": "Time-boxed challenges and achievements convert intentions into action.",
+        "mechanics": [
+          "individual challenges",
+          "community challenges",
+          "custom challenges",
+          "trophies/badges"
+        ],
+        "implementation_notes": [
+          "Create challenges aligned to each colour (e.g., Blue: 'Decision criteria in 10 minutes', Red: 'Consult 2 stakeholders before deciding').",
+          "Award trophies when a challenge is completed; keep a persistent 'Achievements' view."
+        ],
+        "source_examples": [
+          "Nike Run Club challenges and trophies"
+        ]
+      },
+      {
+        "name": "Tiered progression and rewards",
+        "why": "Tiers provide status and unlocks as engagement grows.",
+        "mechanics": [
+          "tiers",
+          "unlockable content",
+          "bonus rewards"
+        ],
+        "implementation_notes": [
+          "Introduce tiers for learning completion and practice: Explorer -> Builder -> Leader.",
+          "Unlock deeper sections of the report and optional team modules as users complete follow-up actions."
+        ],
+        "source_examples": [
+          "Starbucks Rewards tiering (Green/Gold/Reserve)"
+        ]
+      },
+      {
+        "name": "Choice and personalisation",
+        "why": "Users engage more when they choose paths that fit their goals.",
+        "mechanics": [
+          "choose-your-path quests",
+          "personalised next steps"
+        ],
+        "implementation_notes": [
+          "After results, let users pick one of three tracks (communication, decision-making, collaboration).",
+          "Tailor quests to dominant and lowest colours."
+        ]
+      },
+      {
+        "name": "Social mechanics with guardrails",
+        "why": "Social comparison boosts engagement but can harm users if mishandled.",
+        "mechanics": [
+          "team mode",
+          "leaderboards (optional)",
+          "peer feedback"
+        ],
+        "implementation_notes": [
+          "Default to private progress. Offer opt-in team challenges and anonymised cohorts.",
+          "Avoid global leaderboards unless you can protect privacy and reduce unhealthy competition."
+        ]
+      }
+    ],
+    "mechanics_catalogue": {
+      "xp": {
+        "description": "Points for completing questionnaire, reading report, completing next steps.",
+        "default_awards": {
+          "complete_questionnaire": 200,
+          "export_report": 50,
+          "complete_next_step": 150
+        }
+      },
+      "levels": {
+        "description": "Level increases every N XP.",
+        "xp_per_level": 500,
+        "max_level": 20
+      },
+      "badges": [
+        {
+          "badge_id": "badge_profile_complete",
+          "name": "Profile Complete",
+          "criteria": "Complete the questionnaire."
+        },
+        {
+          "badge_id": "badge_reflection",
+          "name": "Reflector",
+          "criteria": "Answer 3 reflection prompts after results."
+        },
+        {
+          "badge_id": "badge_experiment_2w",
+          "name": "Two-Week Experiment",
+          "criteria": "Complete a 14-day behaviour experiment."
+        },
+        {
+          "badge_id": "badge_team_ready",
+          "name": "Team Ready",
+          "criteria": "Invite 2+ colleagues to a team session (optional)."
+        }
+      ],
+      "quests": [
+        {
+          "quest_id": "quest_start",
+          "name": "Get your baseline",
+          "steps": [
+            "Complete questionnaire",
+            "Review explainability panel",
+            "Pick one next-step track"
+          ]
+        },
+        {
+          "quest_id": "quest_communication",
+          "name": "Communication sprint",
+          "steps": [
+            "Complete 3 communication challenges",
+            "Log outcomes",
+            "Update plan"
+          ]
+        },
+        {
+          "quest_id": "quest_decision",
+          "name": "Decision-making sprint",
+          "steps": [
+            "Run 3 decision criteria checklists",
+            "Ask for one peer review",
+            "Log time-to-decision"
+          ]
+        }
+      ],
+      "challenges_by_colour": {
+        "cool_blue": [
+          {
+            "challenge_id": "blue_criteria",
+            "title": "Criteria in 10",
+            "description": "Before a decision, write 3 decision criteria and 1 key risk in under 10 minutes."
+          },
+          {
+            "challenge_id": "blue_simplify",
+            "title": "One-page clarity",
+            "description": "Convert a complex plan into a one-page summary with owners and dates."
+          }
+        ],
+        "earth_green": [
+          {
+            "challenge_id": "green_direct_message",
+            "title": "Kind but clear",
+            "description": "Deliver one direct message with empathy, without cushioning or delaying."
+          },
+          {
+            "challenge_id": "green_checkin",
+            "title": "Two-minute check-in",
+            "description": "Do a 2-minute check-in with one colleague before pushing a deadline."
+          }
+        ],
+        "sunshine_yellow": [
+          {
+            "challenge_id": "yellow_convert",
+            "title": "Ideas to options",
+            "description": "Turn 3 ideas into 3 numbered options with pros/cons and a decision date."
+          },
+          {
+            "challenge_id": "yellow_closeout",
+            "title": "Close-out Friday",
+            "description": "Finish one open loop before starting something new."
+          }
+        ],
+        "fiery_red": [
+          {
+            "challenge_id": "red_consult_2",
+            "title": "Consult 2",
+            "description": "Before a big decision, ask 2 stakeholders for risks and constraints, then decide."
+          },
+          {
+            "challenge_id": "red_define_constraints",
+            "title": "Outcome and constraints",
+            "description": "Write the outcome, constraints, and next milestone in 3 bullet points."
+          }
+        ]
+      },
+      "tiers": [
+        {
+          "tier_id": "tier_explorer",
+          "name": "Explorer",
+          "criteria": "Complete questionnaire and read results."
+        },
+        {
+          "tier_id": "tier_builder",
+          "name": "Builder",
+          "criteria": "Complete 2 challenges and 1 reflection."
+        },
+        {
+          "tier_id": "tier_leader",
+          "name": "Leader",
+          "criteria": "Complete 1 two-week experiment and generate a team report (optional)."
+        }
+      ]
+    }
+  },
+  "report_templates": {
+    "individual_report_v1": {
+      "purpose": "Provide a clear, actionable analysis of an individual’s colour energy spectrum, with strengths, challenges, communication tips, and a practical development plan.",
+      "sections": [
+        "Cover",
+        "Purpose and how to use this report",
+        "Profile summary",
+        "Spectrum and explainability",
+        "Strengths",
+        "Possible challenges",
+        "Communication tips",
+        "Under pressure",
+        "How to work with you",
+        "Next steps and 2-week experiment",
+        "Appendix: scoring transparency and exports"
+      ],
+      "generation_rules": [
+        "Profile summary: 120–180 words, anchored to dominant+secondary energies, avoid clinical language.",
+        "Strengths: pick 5 bullets: 3 from dominant, 2 from secondary; deduplicate by meaning.",
+        "Challenges: pick 5 bullets: 3 from lowest energy blind-spots, 2 from dominant blind-spots.",
+        "Communication tips: 4 bullets derived from how_to_work_with dominant/secondary, plus 1 watch-out related to lowest energy.",
+        "Next steps: pick 3 from next_steps_library (dominant, lowest, and one from secondary). Create a 14-day experiment using one relevant challenge."
+      ]
+    },
+    "team_report_v1": {
+      "purpose": "Provide a comprehensive analysis of a team based on individual colour energy profiles to optimise communication, collaboration, and performance.",
+      "modelled_on": "Insights Discovery Team Report example structure",
+      "sections": [
+        "Cover",
+        "Purpose of the report",
+        "Contents",
+        "Overview of the system",
+        "Overview of individual profiles",
+        "Team wheel overview (positions optional)",
+        "Dominant vs preferred team energies (aggregate)",
+        "Conscious vs less conscious summary (if available)",
+        "Team analysis",
+        "Specialist areas: Collaboration",
+        "Specialist areas: Client interaction (internal and external)",
+        "Specialist areas: Team meetings",
+        "Specialist areas: Management",
+        "Specialist areas: Engaging with management",
+        "Specialist areas: SWOT analysis",
+        "Specialist areas: Transactional analysis (Parent/Adult/Child)",
+        "Specialist areas: Pairings",
+        "Conclusion and next steps"
+      ],
+      "generation_rules": [
+        "Each individual gets: role label (optional), dominant and less dominant colours, 120–180 word profile summary, plus Strengths/Challenges/Communication Tips lists.",
+        "Team analysis: summarise diversity, balance, interpersonal dynamics, conflict style, motivation patterns; keep it behaviour-specific.",
+        "Specialist areas: output playbooks as numbered actions; include meeting agenda patterns and role allocation.",
+        "Pairings: for each pair, list synergy, friction risk, and 2 operating agreements."
+      ]
+    }
+  },
+  "report_quality_rubric": {
+    "must_have": [
+      "Plain language and behaviour anchors",
+      "Explainability: show numbers and how they map to text",
+      "Actionability: next steps are specific, time-boxed, measurable",
+      "Balanced: strengths and risks, not only positives",
+      "Privacy: avoid sharing results with others without consent"
+    ],
+    "style": {
+      "tone": "candid, practical, non-clinical",
+      "length_guidance": {
+        "profile_summary_words": [
+          120,
+          180
+        ],
+        "section_bullets": {
+          "strengths": 5,
+          "challenges": 5,
+          "communication_tips": 4
+        }
+      }
+    }
+  },
+  "reflection_prompts": {
+    "post_results": [
+      "Which two behaviours in the report feel most accurate, and why (one example each)?",
+      "Which one risk or blind spot feels most relevant right now, and what triggers it?",
+      "What is one small change you can run for 14 days to improve outcomes?"
+    ],
+    "weekly_checkin": [
+      "What went well this week that aligns with your dominant energy?",
+      "Where did your lowest energy show up as a friction point?",
+      "What is the one adjustment you will make next week?"
+    ]
+  }
+}
