@@ -25,7 +25,7 @@ function BulletList({ items, cfg }) {
   )
 }
 
-export default function Report({ db, state, onExport, onNavigate }) {
+export default function Report({ db, state, onExport, onExportPdf, onNavigate }) {
   const { report, scores } = state
   const domCfg = colourConfig(scores.dominantColour)
   const secCfg = colourConfig(scores.secondaryColour)
@@ -49,7 +49,13 @@ export default function Report({ db, state, onExport, onNavigate }) {
       </div>
 
       {/* Export */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex flex-wrap gap-3 mb-6">
+        <button
+          onClick={onExportPdf}
+          className="btn-primary bg-indigo-600 text-sm"
+        >
+          📄 Download PDF
+        </button>
         <button
           onClick={onExport}
           className="btn-primary bg-gray-700 text-sm"

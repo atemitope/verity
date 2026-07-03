@@ -83,6 +83,14 @@ export default function App() {
     }
   }, [state, db])
 
+  // Shared gamification side-effect for any export path (JSON or PDF).
+  const awardExportXp = useCallback(() => {
+    let newState = { ...state, exportedReport: true }
+    newState = awardXP(newState, db, 'export_report')
+    newState = checkBadges(newState, db)
+    setState(newState)
+  }, [state, db])
+
   const handleExport = useCallback(() => {
     if (!state.scores) return
     const payload = {
@@ -99,12 +107,24 @@ export default function App() {
     a.click()
     URL.revokeObjectURL(url)
 
-    let newState = { ...state, exportedReport: true }
-    newState = awardXP(newState, db, 'export_report')
-    newState = checkBadges(newState, db)
-    setState(newState)
+    awardExportXp()
     showToast('Report exported! +50 XP', 'success')
-  }, [state, db, showToast])
+  }, [state, awardExportXp, showToast])
+
+  const handleExportPdf = useCallback(async () => {
+    if (!state.scores || !state.report) return
+    try {
+      // Lazy-load the PDF module (and jsPDF) so it stays out of the initial bundle.
+      const { exportReportPdf } = await import('./pdfExport')
+      exportReportPdf(state, db)
+    } catch (err) {
+      console.error('PDF export failed:', err)
+      showToast('PDF export failed. Please try again.', 'error')
+      return
+    }
+    awardExportXp()
+    showToast('PDF downloaded! +50 XP', 'success')
+  }, [state, db, awardExportXp, showToast])
 
   const handleCompleteChallenge = useCallback((challengeId, outcomeNote) => {
     let newState = completeChallenge(state, db, challengeId, outcomeNote)
@@ -176,6 +196,7 @@ export default function App() {
             db={db}
             state={state}
             onExport={handleExport}
+            onExportPdf={handleExportPdf}
             onNavigate={navigate}
           />
         )}
