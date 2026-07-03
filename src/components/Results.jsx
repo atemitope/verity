@@ -1,20 +1,25 @@
 import React, { useState } from 'react'
 import { colourConfig } from '../colours'
 
-function SpectrumBar({ colour, score, maxScore, label, cfg }) {
+function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
   const pct = (score / 6) * 100
   return (
-    <div className="mb-4">
-      <div className="flex justify-between items-center mb-1">
+    <div className="mb-4 last:mb-0">
+      <div className="flex justify-between items-center mb-1.5">
         <div className="flex items-center gap-2">
-          <span>{cfg.emoji}</span>
+          <span className="text-base leading-none">{cfg.emoji}</span>
           <span className="font-medium text-sm text-gray-800">{label}</span>
+          {rank === 0 && (
+            <span className={`badge-pill text-[10px] py-0.5 ${cfg.bgLight} ${cfg.textDark} ring-1 ${cfg.ring}`}>Dominant</span>
+          )}
         </div>
-        <span className="text-sm font-bold text-gray-700">{score.toFixed(2)} / 6</span>
+        <span className="text-sm font-bold text-gray-700 tnums tracking-tight">
+          {score.toFixed(2)} <span className="text-gray-400 font-normal">/ 6</span>
+        </span>
       </div>
-      <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden">
+      <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden ring-1 ring-gray-900/[0.04]">
         <div
-          className={`h-full ${cfg.fill} rounded-full spectrum-fill transition-all`}
+          className={`h-full bg-gradient-to-r ${cfg.gradient} rounded-full spectrum-fill`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -35,21 +40,24 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
   return (
     <div className="animate-fade-in">
       {/* Hero result */}
-      <div className={`card mb-6 bg-gradient-to-br ${dominantCfg.gradient} text-white`}>
-        <div className="text-center py-4">
-          <p className="text-white/80 text-sm mb-1">Your dominant energy</p>
-          <h1 className="text-4xl font-bold mb-2">
+      <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${dominantCfg.gradient} text-white shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
+        <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
+          {dominantCfg.emoji}
+        </div>
+        <div className="text-center py-4 relative">
+          <p className="text-white/80 text-xs uppercase tracking-[0.15em] mb-2">Your dominant energy</p>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-2 tracking-tight">
             {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
           </h1>
-          <p className="text-white/90 text-sm mb-3">{db.colours[scores.dominantColour].core_drive}</p>
-          <div className="flex justify-center gap-4 text-sm">
-            <div className="bg-white/20 rounded-xl px-4 py-2">
-              <p className="text-white/70 text-xs">Secondary</p>
+          <p className="text-white/90 text-sm mb-4 max-w-md mx-auto leading-relaxed">{db.colours[scores.dominantColour].core_drive}</p>
+          <div className="flex justify-center gap-3 text-sm">
+            <div className="bg-white/15 backdrop-blur-sm ring-1 ring-white/20 rounded-xl px-4 py-2">
+              <p className="text-white/70 text-xs mb-0.5">Secondary</p>
               <p className="font-semibold">{secondaryCfg.emoji} {db.colours[scores.secondaryColour].display_name}</p>
             </div>
-            <div className="bg-white/20 rounded-xl px-4 py-2">
-              <p className="text-white/70 text-xs">Confidence</p>
-              <p className="font-semibold">{scores.confidence}%</p>
+            <div className="bg-white/15 backdrop-blur-sm ring-1 ring-white/20 rounded-xl px-4 py-2">
+              <p className="text-white/70 text-xs mb-0.5">Confidence</p>
+              <p className="font-semibold tnums">{scores.confidence}%</p>
             </div>
           </div>
         </div>
@@ -57,11 +65,12 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
 
       {/* Spectrum scores */}
       <div className="card mb-6">
-        <h2 className="font-bold text-gray-900 mb-4">Spectrum Scores</h2>
-        {sorted.map(colourKey => (
+        <h2 className="font-bold text-gray-900 text-lg mb-4">Spectrum Scores</h2>
+        {sorted.map((colourKey, i) => (
           <SpectrumBar
             key={colourKey}
             colour={colourKey}
+            rank={i}
             score={scores.spectrumScores[colourKey]}
             cfg={colourConfig(colourKey)}
             label={db.colours[colourKey].display_name}
@@ -73,10 +82,10 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
       <div className="card mb-6">
         <button
           onClick={() => setShowExplainer(!showExplainer)}
-          className="flex justify-between items-center w-full"
+          className="flex justify-between items-center w-full group focus:outline-none"
         >
-          <h2 className="font-bold text-gray-900">🔍 Explainability Panel</h2>
-          <span className="text-gray-400">{showExplainer ? '▲' : '▼'}</span>
+          <h2 className="font-bold text-gray-900 group-hover:text-gray-600 transition-colors">🔍 Explainability Panel</h2>
+          <span className={`text-gray-400 transition-transform duration-300 ${showExplainer ? 'rotate-180' : ''}`}>▼</span>
         </button>
 
         {showExplainer && (
@@ -98,9 +107,9 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
                     {colours.map(c => (
                       <tr key={c} className="border-b border-gray-50">
                         <td className="py-1.5 font-medium">{db.colours[c].display_name}</td>
-                        <td className="py-1.5 text-right">{scores.rawPoints[c].toFixed(1)}</td>
-                        <td className="py-1.5 text-right">{scores.maxPoints[c].toFixed(1)}</td>
-                        <td className="py-1.5 text-right font-bold">{scores.spectrumScores[c].toFixed(3)}</td>
+                        <td className="py-1.5 text-right tnums">{scores.rawPoints[c].toFixed(1)}</td>
+                        <td className="py-1.5 text-right tnums">{scores.maxPoints[c].toFixed(1)}</td>
+                        <td className="py-1.5 text-right font-bold tnums">{scores.spectrumScores[c].toFixed(3)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -120,9 +129,9 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
                   { label: 'Red–Green polarity', value: scores.polarityRedGreen.toFixed(3) },
                   { label: 'Blue–Yellow polarity', value: scores.polarityBlueYellow.toFixed(3) },
                 ].map(m => (
-                  <div key={m.label} className="bg-gray-50 rounded-lg p-2">
+                  <div key={m.label} className="bg-gray-50 rounded-lg p-2.5 ring-1 ring-gray-900/[0.03]">
                     <p className="text-xs text-gray-500">{m.label}</p>
-                    <p className="font-bold">{m.value}</p>
+                    <p className="font-bold tnums">{m.value}</p>
                   </div>
                 ))}
               </div>
@@ -138,9 +147,9 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
                   { label: 'Forced alignment', value: `${(scores.confidenceInputs.forcedAlignment * 100).toFixed(0)}%` },
                   { label: 'Supporting (FC)', value: `${scores.confidenceInputs.forcedChoicesSupportingTop2Count}/${scores.confidenceInputs.totalForcedChoices}` },
                 ].map(m => (
-                  <div key={m.label} className="bg-gray-50 rounded-lg p-2">
+                  <div key={m.label} className="bg-gray-50 rounded-lg p-2.5 ring-1 ring-gray-900/[0.03]">
                     <p className="text-xs text-gray-500">{m.label}</p>
-                    <p className="font-bold">{m.value}</p>
+                    <p className="font-bold tnums">{m.value}</p>
                   </div>
                 ))}
               </div>

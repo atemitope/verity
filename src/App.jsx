@@ -193,10 +193,13 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-700">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
         <div className="text-center text-white">
-          <div className="text-5xl mb-4 animate-bounce-soft">🌈</div>
-          <p className="text-xl font-light">Loading Colour Spectrum Profile…</p>
+          <div className="text-6xl mb-5 animate-float-soft drop-shadow-lg">🌈</div>
+          <p className="text-lg font-light tracking-wide text-white/90">Loading Colour Spectrum Profile…</p>
+          <div className="mt-5 mx-auto w-40 h-1 rounded-full overflow-hidden bg-white/15">
+            <div className="h-full w-1/2 rounded-full bg-gradient-to-r from-blue-400 via-yellow-300 to-red-400 animate-pulse-soft" />
+          </div>
         </div>
       </div>
     )
@@ -214,7 +217,7 @@ export default function App() {
   const levelProgress = getLevelProgress(state, db)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f6f7f9] antialiased">
       <Header
         state={state}
         db={db}
@@ -226,7 +229,7 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 sm:py-10">
         {state.view === 'home' && (
           <Home db={db} state={state} onStart={() => navigate('quiz')} onNavigate={navigate} />
         )}
@@ -278,9 +281,11 @@ export default function App() {
       </main>
 
       {/* Disclaimer */}
-      <footer className="text-center text-xs text-gray-400 pb-8 px-4">
-        Colour Spectrum Profile is a behavioural preference tool for self-awareness and development.
-        It is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.
+      <footer className="max-w-4xl mx-auto px-4 pb-10">
+        <div className="border-t border-gray-200/70 pt-6 text-center text-xs leading-relaxed text-gray-400 max-w-2xl mx-auto">
+          Colour Spectrum Profile is a behavioural preference tool for self-awareness and development.
+          It is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.
+        </div>
       </footer>
 
       {toast && <MilestoneToast toast={toast} />}

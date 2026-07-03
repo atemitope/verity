@@ -3,9 +3,10 @@ import { colourConfig } from '../colours'
 
 function Section({ title, icon, children }) {
   return (
-    <div className="mb-6">
-      <h2 className="font-bold text-gray-900 text-lg mb-3 flex items-center gap-2">
-        <span>{icon}</span> {title}
+    <div>
+      <h2 className="font-bold text-gray-900 text-lg mb-4 flex items-center gap-2.5 tracking-tight">
+        <span className="grid place-items-center w-9 h-9 rounded-xl bg-gray-100 text-base leading-none">{icon}</span>
+        {title}
       </h2>
       {children}
     </div>
@@ -16,8 +17,8 @@ function BulletList({ items, cfg }) {
   return (
     <ul className="space-y-2">
       {items.map((item, i) => (
-        <li key={i} className={`flex items-start gap-2 p-3 rounded-xl ${cfg.bgLight}`}>
-          <span className={`${cfg.text} mt-0.5`}>▸</span>
+        <li key={i} className={`flex items-start gap-2.5 p-3 rounded-xl ${cfg.bgLight} ring-1 ring-gray-900/[0.03]`}>
+          <span className={`${cfg.text} mt-0.5 shrink-0`}>▸</span>
           <span className="text-sm text-gray-700 leading-relaxed">{item}</span>
         </li>
       ))}
@@ -35,15 +36,15 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
   return (
     <div className="animate-fade-in max-w-2xl mx-auto">
       {/* Cover */}
-      <div className={`card mb-6 bg-gradient-to-br ${domCfg.gradient} text-white text-center py-8`}>
-        <p className="text-white/80 text-sm mb-1">Colour Spectrum Profile Report</p>
-        <h1 className="text-3xl font-bold mb-2">
+      <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${domCfg.gradient} text-white text-center py-9 shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
+        <p className="text-white/80 text-xs uppercase tracking-[0.15em] mb-2 relative">Colour Spectrum Profile Report</p>
+        <h1 className="text-3xl font-bold mb-2 tracking-tight relative">
           {domCfg.emoji} {domColour.display_name} · {secCfg.emoji} {secColour.display_name}
         </h1>
         {report.blurbLabel && (
-          <p className="text-white/90 text-lg font-medium mt-2">{report.blurbLabel}</p>
+          <p className="text-white/90 text-lg font-medium mt-2 relative">{report.blurbLabel}</p>
         )}
-        <p className="text-white/70 text-xs mt-3">
+        <p className="text-white/70 text-xs mt-3 relative tnums">
           Generated {new Date().toLocaleDateString()}
         </p>
       </div>
@@ -58,13 +59,13 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
         </button>
         <button
           onClick={onExport}
-          className="btn-primary bg-gray-700 text-sm"
+          className="btn-primary bg-gray-800 text-sm"
         >
           📥 Export JSON
         </button>
         <button
           onClick={() => onNavigate('challenges')}
-          className="btn-primary bg-orange-500 text-sm"
+          className="btn-primary bg-gradient-to-r from-orange-400 to-red-500 text-sm"
         >
           ⚡ Start Challenges
         </button>
@@ -74,13 +75,13 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
         <Section title="Profile Summary" icon="🎯">
           <p className="text-gray-700 leading-relaxed">{report.profileSummary}</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className={`p-3 rounded-xl ${domCfg.bgLight}`}>
-              <p className={`text-xs ${domCfg.text} font-semibold mb-1`}>Core drive</p>
-              <p className="text-sm text-gray-700">{domColour.core_drive}</p>
+            <div className={`p-3 rounded-xl ${domCfg.bgLight} ring-1 ${domCfg.ring}`}>
+              <p className={`text-xs ${domCfg.text} font-semibold mb-1 uppercase tracking-wide`}>Core drive</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{domColour.core_drive}</p>
             </div>
-            <div className={`p-3 rounded-xl ${secCfg.bgLight}`}>
-              <p className={`text-xs ${secCfg.text} font-semibold mb-1`}>Supporting drive</p>
-              <p className="text-sm text-gray-700">{secColour.core_drive}</p>
+            <div className={`p-3 rounded-xl ${secCfg.bgLight} ring-1 ${secCfg.ring}`}>
+              <p className={`text-xs ${secCfg.text} font-semibold mb-1 uppercase tracking-wide`}>Supporting drive</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{secColour.core_drive}</p>
             </div>
           </div>
         </Section>
@@ -92,20 +93,20 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
             const cfg = colourConfig(c)
             const score = scores.spectrumScores[c]
             return (
-              <div key={c} className="mb-3">
-                <div className="flex justify-between text-sm mb-1">
+              <div key={c} className="mb-3 last:mb-0">
+                <div className="flex justify-between text-sm mb-1.5">
                   <span className="font-medium">{cfg.emoji} {db.colours[c].display_name}</span>
-                  <span className="text-gray-500">
-                    {scores.rawPoints[c].toFixed(0)} / {scores.maxPoints[c].toFixed(0)} pts → <strong>{score.toFixed(2)}/6</strong>
+                  <span className="text-gray-500 tnums">
+                    {scores.rawPoints[c].toFixed(0)} / {scores.maxPoints[c].toFixed(0)} pts → <strong className="text-gray-700">{score.toFixed(2)}/6</strong>
                   </span>
                 </div>
-                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                  <div className={`h-full ${cfg.fill} rounded-full spectrum-fill`} style={{ width: `${(score / 6) * 100}%` }} />
+                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden ring-1 ring-gray-900/[0.04]">
+                  <div className={`h-full bg-gradient-to-r ${cfg.gradient} rounded-full spectrum-fill`} style={{ width: `${(score / 6) * 100}%` }} />
                 </div>
               </div>
             )
           })}
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-gray-400 mt-3 tnums">
             Confidence: {scores.confidence}% · Balance index: {scores.balanceIndex.toFixed(2)} · Top gap: {scores.topGap.toFixed(2)}
           </p>
         </Section>
@@ -155,11 +156,11 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
             {report.nextSteps.map((step, i) => {
               const cfg = colourConfig(step.colour)
               return (
-                <div key={i} className={`p-4 rounded-xl border ${cfg.border} ${cfg.bgLight}`}>
-                  <p className={`text-xs font-semibold ${cfg.text} mb-1`}>
+                <div key={i} className={`p-4 rounded-xl ring-1 ${cfg.ring} ${cfg.bgLight} transition-transform duration-150 hover:-translate-y-0.5`}>
+                  <p className={`text-xs font-semibold ${cfg.text} mb-1 uppercase tracking-wide`}>
                     {cfg.emoji} {db.colours[step.colour].display_name}
                   </p>
-                  <p className="text-sm text-gray-700">{step.text}</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{step.text}</p>
                 </div>
               )
             })}
@@ -182,8 +183,8 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
         </Section>
       </div>
 
-      <div className="card mb-6 bg-amber-50 border border-amber-200">
-        <p className="text-xs text-amber-700">
+      <div className="card mb-6 bg-amber-50 ring-1 ring-amber-500/15">
+        <p className="text-xs text-amber-800/90 leading-relaxed">
           <strong>Disclaimer:</strong> This report is generated from a self-reported behavioural preference questionnaire.
           It is intended as a tool for self-awareness and professional development, not a clinical or psychological assessment.
           Results are not verified against the proprietary Insights Discovery® instrument.

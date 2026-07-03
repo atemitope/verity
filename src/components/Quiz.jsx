@@ -62,13 +62,13 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
     <div className="animate-fade-in max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex justify-between items-center mb-2 text-sm text-gray-500">
-          <span>Question {currentIndex + 1} of {totalItems}</span>
-          <span>{progressPct}% complete</span>
+        <div className="flex justify-between items-center mb-2 text-sm">
+          <span className="font-semibold text-gray-700 tnums">Question {currentIndex + 1} <span className="text-gray-400 font-normal">of {totalItems}</span></span>
+          <span className="text-gray-500 tnums">{progressPct}% complete</span>
         </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="relative w-full h-2.5 bg-gray-200/80 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -77,8 +77,8 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
           {MILESTONES.slice(0, -1).map(m => (
             <div
               key={m}
-              className="absolute top-0 w-px h-2 bg-gray-400"
-              style={{ left: `${m}%`, marginTop: '-8px' }}
+              className="absolute top-0 w-0.5 h-2.5 bg-white/70"
+              style={{ left: `${m}%`, marginTop: '-10px' }}
             />
           ))}
         </div>
@@ -96,11 +96,11 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
       {/* Question card */}
       <div className="card animate-slide-up" key={item.id}>
         {/* Type indicator */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className={`badge-pill text-xs ${
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span className={`badge-pill text-xs ring-1 ${
             item.type === 'likert_1_5'
-              ? 'bg-blue-50 text-blue-600'
-              : 'bg-purple-50 text-purple-600'
+              ? 'bg-blue-50 text-blue-600 ring-blue-500/10'
+              : 'bg-purple-50 text-purple-600 ring-purple-500/10'
           }`}>
             {item.type === 'likert_1_5' ? '📊 Rate your agreement' : '⚖️ Choose one'}
           </span>
@@ -109,7 +109,7 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
           )}
         </div>
 
-        <h2 className="text-xl font-semibold text-gray-900 mb-6 leading-relaxed">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6 leading-snug tracking-tight">
           {item.type === 'forced_choice' ? 'Which describes you better?' : item.text}
         </h2>
 
@@ -120,14 +120,16 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
               <button
                 key={val}
                 onClick={() => handleLikertResponse(val)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all duration-150 hover:scale-[1.01]
+                className={`group w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left
+                  transition-[transform,border-color,background-color,box-shadow] duration-150 ease-out
+                  active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300
                   ${currentResponse === val
-                    ? 'border-blue-500 bg-blue-50 text-blue-800 font-medium'
-                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                    ? 'border-blue-500 bg-blue-50 text-blue-900 font-medium shadow-[0_2px_8px_-2px_rgba(59,130,246,0.35)]'
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/60'
                   }`}
               >
-                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0
-                  ${currentResponse === val ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                <span className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 tnums transition-colors duration-150
+                  ${currentResponse === val ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-700'}`}>
                   {val}
                 </span>
                 <span className="text-sm">{LIKERT_LABELS[val - 1]}</span>
@@ -151,14 +153,19 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
                 <button
                   key={optKey}
                   onClick={() => handleForcedChoice(optKey)}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-150 hover:scale-[1.01]
+                  className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 text-left
+                    transition-[transform,border-color,background-color,box-shadow] duration-150 ease-out
+                    active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300
                     ${currentResponse === optKey
-                      ? `${cfg.border} ${cfg.bgLight} ${cfg.textDark} font-medium`
-                      : 'border-gray-200 hover:border-gray-400'
+                      ? `${cfg.border} ${cfg.bgLight} ${cfg.textDark} font-medium shadow-sm`
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/60'
                     }`}
                 >
-                  <span className="font-bold text-xs text-gray-400 mr-2">{optKey}</span>
-                  <span className="text-sm leading-relaxed">{optText}</span>
+                  <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs
+                    ${currentResponse === optKey ? `${cfg.bg} text-white` : 'bg-gray-100 text-gray-500'}`}>
+                    {optKey}
+                  </span>
+                  <span className="text-sm leading-relaxed pt-0.5">{optText}</span>
                 </button>
               )
             })}
@@ -171,14 +178,14 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
         <button
           onClick={goBack}
           disabled={currentIndex === 0}
-          className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-30 transition-colors"
+          className="px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-800 hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent transition-[background-color,color,transform] duration-150 active:scale-[0.97]"
         >
           ← Back
         </button>
         {currentResponse !== undefined && currentIndex < totalItems - 1 && (
           <button
             onClick={() => setCurrentIndex(i => i + 1)}
-            className="px-4 py-2 text-sm text-blue-600 font-medium hover:text-blue-800 transition-colors"
+            className="px-4 py-2 rounded-lg text-sm text-blue-600 font-medium hover:text-blue-800 hover:bg-blue-50 transition-[background-color,color,transform] duration-150 active:scale-[0.97]"
           >
             Next →
           </button>

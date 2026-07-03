@@ -3,6 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
+      screens: {
+        xs: '400px',
+      },
       colors: {
         'cool-blue': {
           light: '#dbeafe',
@@ -27,9 +30,11 @@ export default {
       },
       animation: {
         'fade-in': 'fadeIn 0.4s ease-in-out',
-        'slide-up': 'slideUp 0.4s ease-out',
+        'slide-up': 'slideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
         'pulse-soft': 'pulseSoft 2s infinite',
         'bounce-soft': 'bounceSoft 0.6s ease-out',
+        'scale-in': 'scaleIn 0.32s cubic-bezier(0.22, 1, 0.36, 1)',
+        'float-soft': 'floatSoft 4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -37,7 +42,7 @@ export default {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '0%': { opacity: '0', transform: 'translateY(14px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         pulseSoft: {
@@ -49,6 +54,18 @@ export default {
           '60%': { transform: 'scale(1.1)' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'translateY(8px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        floatSoft: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
+      },
+      boxShadow: {
+        'card': '0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)',
+        'card-hover': '0 2px 4px rgba(16,24,40,0.05), 0 12px 28px -8px rgba(16,24,40,0.18)',
       },
     },
   },
