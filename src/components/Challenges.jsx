@@ -14,14 +14,14 @@ function ChallengeCard({ challenge, colourKey, db, completed, onComplete }) {
   }
 
   return (
-    <div className={`border-2 rounded-2xl p-4 transition-all ${
+    <div className={`rounded-2xl p-4 ring-1 transition-[transform,box-shadow] duration-200 ${
       completed
-        ? 'bg-green-50 border-green-200 opacity-80'
-        : `${cfg.bgLight} ${cfg.border}`
+        ? 'bg-green-50 ring-green-500/20 opacity-90'
+        : `${cfg.bgLight} ${cfg.ring} hover:-translate-y-0.5 hover:shadow-md`
     }`}>
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex justify-between items-start gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <span className={`text-lg ${completed ? '' : cfg.emoji}`}>
+          <span className="text-lg leading-none">
             {completed ? '✅' : cfg.emoji}
           </span>
           <h3 className={`font-bold text-sm ${completed ? 'text-green-800' : cfg.textDark}`}>
@@ -29,13 +29,13 @@ function ChallengeCard({ challenge, colourKey, db, completed, onComplete }) {
           </h3>
         </div>
         {!completed && (
-          <span className="badge-pill bg-white/80 text-gray-500 text-xs">+150 XP</span>
+          <span className="badge-pill bg-white/80 ring-1 ring-gray-900/[0.04] text-gray-500 text-xs shrink-0 tnums">+150 XP</span>
         )}
       </div>
       <p className="text-sm text-gray-600 mb-3 leading-relaxed">{challenge.description}</p>
 
       {completed ? (
-        <div className="bg-green-100 rounded-lg p-2">
+        <div className="bg-green-100/70 rounded-xl p-2.5">
           <p className="text-xs text-green-700">
             <strong>Your note:</strong> {completed.note}
           </p>
@@ -97,8 +97,8 @@ export default function Challenges({ db, state, onComplete, onNavigate }) {
   return (
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">⚡ Challenges</h1>
-        <span className="badge-pill bg-green-100 text-green-700">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">⚡ Challenges</h1>
+        <span className="badge-pill bg-green-100 text-green-700 tnums">
           {completedCount}/{totalCount} done
         </span>
       </div>
@@ -107,28 +107,28 @@ export default function Challenges({ db, state, onComplete, onNavigate }) {
       <div className="card mb-6">
         <div className="flex justify-between text-sm text-gray-500 mb-2">
           <span>Challenges completed</span>
-          <span className="font-bold">{Math.round((completedCount / totalCount) * 100)}%</span>
+          <span className="font-bold tnums">{Math.round((completedCount / totalCount) * 100)}%</span>
         </div>
-        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden ring-1 ring-gray-900/[0.04]">
           <div
-            className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-700"
+            className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-700 ease-out"
             style={{ width: `${(completedCount / totalCount) * 100}%` }}
           />
         </div>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto">
+      <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1">
         <button
           onClick={() => setFilter('all')}
-          className={`badge-pill whitespace-nowrap ${filter === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'}`}
+          className={`badge-pill whitespace-nowrap transition-[transform,background-color] duration-150 active:scale-[0.96] ${filter === 'all' ? 'bg-gray-900 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
         >
           All
         </button>
         {dominantColour && (
           <button
             onClick={() => setFilter('dominant')}
-            className={`badge-pill whitespace-nowrap ${filter === 'dominant' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'}`}
+            className={`badge-pill whitespace-nowrap transition-[transform,background-color] duration-150 active:scale-[0.96] ${filter === 'dominant' ? 'bg-gray-900 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
           >
             ⭐ My Dominant
           </button>
@@ -139,7 +139,7 @@ export default function Challenges({ db, state, onComplete, onNavigate }) {
             <button
               key={c}
               onClick={() => setFilter(c)}
-              className={`badge-pill whitespace-nowrap ${filter === c ? `${cfg.bg} text-white` : `${cfg.bgLight} ${cfg.text}`}`}
+              className={`badge-pill whitespace-nowrap transition-[transform,background-color] duration-150 active:scale-[0.96] ${filter === c ? `${cfg.bg} text-white shadow-sm` : `${cfg.bgLight} ${cfg.text} hover:brightness-95`}`}
             >
               {cfg.emoji} {db.colours[c].display_name}
             </button>

@@ -5,17 +5,21 @@ import { computeScores, generateReport } from '../scoring'
 function TeamMemberCard({ member, db, onRemove }) {
   const cfg = colourConfig(member.scores.dominantColour)
   return (
-    <div className={`card flex items-center gap-3 ${cfg.bgLight} border ${cfg.border}`}>
-      <div className={`w-10 h-10 rounded-full ${cfg.bg} flex items-center justify-center text-white font-bold`}>
+    <div className={`card flex items-center gap-3 py-3.5 ${cfg.bgLight} ring-1 ${cfg.ring}`}>
+      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${cfg.gradient} flex items-center justify-center text-white font-bold shrink-0 shadow-sm`}>
         {member.name[0].toUpperCase()}
       </div>
-      <div className="flex-1">
-        <p className="font-semibold text-sm text-gray-900">{member.name}</p>
-        <p className={`text-xs ${cfg.text}`}>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-sm text-gray-900 truncate">{member.name}</p>
+        <p className={`text-xs ${cfg.text} truncate`}>
           {cfg.emoji} {db.colours[member.scores.dominantColour].display_name} · {colourConfig(member.scores.secondaryColour).emoji} {db.colours[member.scores.secondaryColour].display_name}
         </p>
       </div>
-      <button onClick={() => onRemove(member.name)} className="text-gray-400 hover:text-red-500 text-sm">✕</button>
+      <button
+        onClick={() => onRemove(member.name)}
+        aria-label={`Remove ${member.name}`}
+        className="grid place-items-center w-9 h-9 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors text-sm shrink-0"
+      >✕</button>
     </div>
   )
 }
@@ -48,12 +52,12 @@ function TeamReportPanel({ teamMembers, db }) {
           const pct = teamMembers.length > 0 ? (count / teamMembers.length) * 100 : 0
           return (
             <div key={c} className="mb-3">
-              <div className="flex justify-between text-sm mb-1">
+              <div className="flex justify-between text-sm mb-1.5">
                 <span>{cfg.emoji} {db.colours[c].display_name}</span>
-                <span className="text-gray-500">{count} member{count !== 1 ? 's' : ''} ({Math.round(pct)}%)</span>
+                <span className="text-gray-500 tnums">{count} member{count !== 1 ? 's' : ''} ({Math.round(pct)}%)</span>
               </div>
-              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div className={`h-full ${cfg.fill} rounded-full`} style={{ width: `${pct}%` }} />
+              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden ring-1 ring-gray-900/[0.04]">
+                <div className={`h-full bg-gradient-to-r ${cfg.gradient} rounded-full transition-all duration-700 ease-out`} style={{ width: `${pct}%` }} />
               </div>
             </div>
           )
@@ -166,13 +170,13 @@ export default function TeamMode({ db, state, onUpdateState, onNavigate, showToa
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">👥 Team Mode</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">👥 Team Mode</h1>
       <p className="text-sm text-gray-500 mb-6">
         Aggregate team profiles to understand collective dynamics. All sharing is opt-in and consent-gated.
       </p>
 
       {/* Privacy notice */}
-      <div className="card mb-6 bg-blue-50 border border-blue-200">
+      <div className="card mb-6 bg-blue-50 ring-1 ring-blue-500/15">
         <p className="text-sm text-blue-800">
           🔒 <strong>Privacy first:</strong> Results are only shared within this session. No data leaves your device.
           Each person must explicitly consent before their profile is added to the team view.
