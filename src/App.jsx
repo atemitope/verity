@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { loadState, saveState, createInitialState } from './storage'
+import { fetchMe, getServerState, putServerState, login as authLogin, logout as authLogout } from './auth'
 import { computeScores, generateReport } from './scoring'
 import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent, getLevelProgress } from './gamification'
 import Header from './components/Header'
@@ -17,6 +18,13 @@ export default function App() {
   const [state, setState] = useState(null)
   const [toast, setToast] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null)
+
+  // Refs for server-sync coordination (auth is additive; anonymous flow is unchanged).
+  const stateRef = useRef(null)
+  const adoptedRef = useRef(false)   // has this session reconciled with the server yet?
+  const syncReadyRef = useRef(false) // safe to start pushing local changes upstream?
+  const syncTimer = useRef(null)
 
   // Load database
   useEffect(() => {
@@ -34,10 +42,44 @@ export default function App() {
       })
   }, [])
 
-  // Persist state
+  // Detect an existing session on load (null when signed out — flow stays on-device).
+  useEffect(() => {
+    fetchMe().then(setUser)
+  }, [])
+
+  // Keep a live ref to state for the adoption effect below.
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
+
+  // Persist state locally on every change (offline / anonymous default: on-device).
   useEffect(() => {
     if (state) saveState(state)
   }, [state])
+
+  // On sign-in, reconcile with the account: server state is the source of truth
+  // across devices; if the account has none yet, seed it from local state.
+  useEffect(() => {
+    if (!user || adoptedRef.current) return
+    adoptedRef.current = true
+    getServerState().then(serverState => {
+      if (serverState) {
+        setState(serverState)
+        showToast('Synced your profile from your account', 'info')
+      } else if (stateRef.current) {
+        putServerState(stateRef.current)
+      }
+      syncReadyRef.current = true
+    })
+  }, [user, showToast])
+
+  // While signed in, debounce-push local changes up to the account.
+  useEffect(() => {
+    if (!user || !state || !syncReadyRef.current) return
+    clearTimeout(syncTimer.current)
+    syncTimer.current = setTimeout(() => { putServerState(state) }, 800)
+    return () => clearTimeout(syncTimer.current)
+  }, [state, user])
 
   const updateState = useCallback((updates) => {
     setState(prev => {
@@ -112,6 +154,16 @@ export default function App() {
     showToast('Challenge complete! +150 XP', 'success')
   }, [state, db, showToast])
 
+  const handleLogin = useCallback(() => authLogin(), [])
+
+  const handleLogout = useCallback(async () => {
+    await authLogout()
+    setUser(null)
+    adoptedRef.current = false
+    syncReadyRef.current = false
+    showToast('Signed out', 'info')
+  }, [showToast])
+
   const handleReset = useCallback(() => {
     if (window.confirm('Reset your profile? All progress will be lost.')) {
       setState(createInitialState())
@@ -149,6 +201,9 @@ export default function App() {
         onNavigate={navigate}
         progressPercent={progressPercent}
         levelProgress={levelProgress}
+        user={user}
+        onLogin={handleLogin}
+        onLogout={handleLogout}
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">

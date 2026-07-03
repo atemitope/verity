@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { key: 'team', label: 'Team', icon: '👥' },
 ]
 
-export default function Header({ state, db, onNavigate, progressPercent, levelProgress }) {
+export default function Header({ state, db, onNavigate, progressPercent, levelProgress, user, onLogin, onLogout }) {
   const { gamification } = state
   const xpPerLevel = db.gamification.mechanics_catalogue.levels.xp_per_level
 
@@ -54,6 +54,38 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
                 {gamification.tier === 'tier_explorer' ? '🧭 Explorer' :
                  gamification.tier === 'tier_builder' ? '🔨 Builder' : '👑 Leader'}
               </span>
+            )}
+
+            {/* Auth control */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt=""
+                    className="w-6 h-6 rounded-full border border-gray-200"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-600">
+                    {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <button
+                  onClick={onLogout}
+                  className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
+                  title={user.email || user.name || 'Signed in'}
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onLogin}
+                className="text-xs font-medium bg-gray-900 text-white px-3 py-1 rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Sign in
+              </button>
             )}
           </div>
         </div>
