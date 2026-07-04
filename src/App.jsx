@@ -57,8 +57,25 @@ export default function App() {
     if (state) saveState(state)
   }, [state])
 
+  const updateState = useCallback((updates) => {
+    setState(prev => {
+      const next = typeof updates === 'function' ? updates(prev) : { ...prev, ...updates }
+      return next
+    })
+  }, [])
+
+  const showToast = useCallback((message, type = 'success') => {
+    setToast({ message, type, id: Date.now() })
+    setTimeout(() => setToast(null), 3500)
+  }, [])
+
+  const navigate = useCallback((view) => {
+    updateState({ view })
+  }, [updateState])
+
   // On sign-in, reconcile with the account: server state is the source of truth
   // across devices; if the account has none yet, seed it from local state.
+  // (Declared after showToast so it isn't referenced before initialization.)
   useEffect(() => {
     if (!user || adoptedRef.current) return
     adoptedRef.current = true
@@ -80,22 +97,6 @@ export default function App() {
     syncTimer.current = setTimeout(() => { putServerState(state) }, 800)
     return () => clearTimeout(syncTimer.current)
   }, [state, user])
-
-  const updateState = useCallback((updates) => {
-    setState(prev => {
-      const next = typeof updates === 'function' ? updates(prev) : { ...prev, ...updates }
-      return next
-    })
-  }, [])
-
-  const showToast = useCallback((message, type = 'success') => {
-    setToast({ message, type, id: Date.now() })
-    setTimeout(() => setToast(null), 3500)
-  }, [])
-
-  const navigate = useCallback((view) => {
-    updateState({ view })
-  }, [updateState])
 
   const handleQuizComplete = useCallback((responses) => {
     if (!db) return
