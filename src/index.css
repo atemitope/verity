@@ -107,6 +107,17 @@
   animation: confetti-fall 2s ease-in forwards;
 }
 
+/* Subtle grain overlay — adds tactile depth to otherwise flat surfaces.
+   Fixed, non-interactive, and very low opacity so it never touches legibility. */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 /* Hide scrollbars on horizontal nav */
 .scrollbar-hide {
   -ms-overflow-style: none;

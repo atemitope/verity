@@ -194,7 +194,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
         <div className="text-center text-white">
           <div className="text-6xl mb-5 animate-float-soft drop-shadow-lg">🌈</div>
           <p className="text-lg font-light tracking-wide text-white/90">Loading Colour Spectrum Profile…</p>
@@ -208,7 +208,7 @@ export default function App() {
 
   if (!db || !state) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[100dvh] flex items-center justify-center">
         <p className="text-red-500">Failed to load. Please refresh.</p>
       </div>
     )
@@ -218,7 +218,7 @@ export default function App() {
   const levelProgress = getLevelProgress(state, db)
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] antialiased">
+    <div className="min-h-[100dvh] bg-[#f6f7f9] antialiased">
       <Header
         state={state}
         db={db}
@@ -290,6 +290,9 @@ export default function App() {
       </footer>
 
       {toast && <MilestoneToast toast={toast} />}
+
+      {/* Subtle grain to give flat surfaces depth (fixed, non-interactive). */}
+      <div aria-hidden="true" className="noise-overlay" />
     </div>
   )
 }
