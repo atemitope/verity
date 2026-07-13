@@ -29,7 +29,7 @@ export default function Home({ db, state, onStart, onNavigate }) {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => onNavigate('results')}
-                className="btn-primary bg-gradient-to-r from-blue-500 to-indigo-500"
+                className="btn-primary bg-gradient-to-r from-blue-600 to-indigo-600"
               >
                 View My Results
               </button>
@@ -43,7 +43,7 @@ export default function Home({ db, state, onStart, onNavigate }) {
           ) : (
             <button
               onClick={onStart}
-              className="btn-primary group bg-gradient-to-r from-blue-500 via-green-500 to-yellow-500 text-lg px-8 py-4"
+              className="btn-primary group bg-gradient-to-r from-blue-600 via-green-700 to-yellow-700 text-lg px-8 py-4"
             >
               Start My Profile
               <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>

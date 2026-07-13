@@ -283,7 +283,7 @@ export default function App() {
 
       {/* Disclaimer */}
       <footer className="max-w-4xl mx-auto px-4 pb-10">
-        <div className="border-t border-gray-200/70 pt-6 text-center text-xs leading-relaxed text-gray-400 max-w-2xl mx-auto">
+        <div className="border-t border-gray-200/70 pt-6 text-center text-xs leading-relaxed text-gray-500 max-w-2xl mx-auto">
           Colour Spectrum Profile is a behavioural preference tool for self-awareness and development.
           It is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.
         </div>

@@ -14,7 +14,7 @@ function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
           )}
         </div>
         <span className="text-sm font-bold text-gray-700 tnums tracking-tight">
-          {score.toFixed(2)} <span className="text-gray-400 font-normal">/ 6</span>
+          {score.toFixed(2)} <span className="text-gray-500 font-normal">/ 6</span>
         </span>
       </div>
       <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden ring-1 ring-gray-900/[0.04]">
@@ -85,7 +85,7 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
           className="flex justify-between items-center w-full group focus:outline-none"
         >
           <h2 className="font-bold text-gray-900 group-hover:text-gray-600 transition-colors">🔍 Explainability Panel</h2>
-          <span className={`text-gray-400 transition-transform duration-300 ${showExplainer ? 'rotate-180' : ''}`}>▼</span>
+          <span className={`text-gray-500 transition-transform duration-300 ${showExplainer ? 'rotate-180' : ''}`}>▼</span>
         </button>
 
         {showExplainer && (
@@ -115,7 +115,7 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
                   </tbody>
                 </table>
               </div>
-              <p className="text-xs text-gray-400 mt-2">Formula: 6 × raw ÷ max</p>
+              <p className="text-xs text-gray-500 mt-2">Formula: 6 × raw ÷ max</p>
             </div>
 
             {/* Derived metrics */}
@@ -153,7 +153,7 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs text-gray-500 mt-2">
                 Confidence = 20 + 25×spread + 25×top_gap + 30×forced_alignment (−15 if spread &lt; 1).
                 Not a claim of correctness against proprietary instruments.
               </p>

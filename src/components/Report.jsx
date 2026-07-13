@@ -106,7 +106,7 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
               </div>
             )
           })}
-          <p className="text-xs text-gray-400 mt-3 tnums">
+          <p className="text-xs text-gray-500 mt-3 tnums">
             Confidence: {scores.confidence}% · Balance index: {scores.balanceIndex.toFixed(2)} · Top gap: {scores.topGap.toFixed(2)}
           </p>
         </Section>
@@ -115,7 +115,7 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
       <div className="card mb-6">
         <Section title="Strengths" icon="💪">
           <BulletList items={report.strengths} cfg={domCfg} />
-          <p className="text-xs text-gray-400 mt-2">3 from {domColour.display_name}, 2 from {secColour.display_name}</p>
+          <p className="text-xs text-gray-500 mt-2">3 from {domColour.display_name}, 2 from {secColour.display_name}</p>
         </Section>
       </div>
 

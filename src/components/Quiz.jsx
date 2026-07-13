@@ -63,7 +63,7 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
       {/* Header */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2 text-sm">
-          <span className="font-semibold text-gray-700 tnums">Question {currentIndex + 1} <span className="text-gray-400 font-normal">of {totalItems}</span></span>
+          <span className="font-semibold text-gray-700 tnums">Question {currentIndex + 1} <span className="text-gray-500 font-normal">of {totalItems}</span></span>
           <span className="text-gray-500 tnums">{progressPct}% complete</span>
         </div>
         <div className="relative w-full h-2.5 bg-gray-200/80 rounded-full overflow-hidden">
@@ -105,7 +105,7 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
             {item.type === 'likert_1_5' ? '📊 Rate your agreement' : '⚖️ Choose one'}
           </span>
           {db.questionnaire.instructions && currentIndex === 0 && (
-            <span className="text-xs text-gray-400">{db.questionnaire.instructions}</span>
+            <span className="text-xs text-gray-500">{db.questionnaire.instructions}</span>
           )}
         </div>
 
@@ -193,7 +193,7 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
       </div>
 
       {/* Save/resume note */}
-      <p className="text-center text-xs text-gray-400 mt-4">
+      <p className="text-center text-xs text-gray-500 mt-4">
         Progress is saved automatically. You can continue where you left off.
       </p>
     </div>

@@ -18,7 +18,7 @@ function TeamMemberCard({ member, db, onRemove }) {
       <button
         onClick={() => onRemove(member.name)}
         aria-label={`Remove ${member.name}`}
-        className="grid place-items-center w-9 h-9 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors text-sm shrink-0"
+        className="grid place-items-center w-9 h-9 rounded-full text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors text-sm shrink-0"
       >✕</button>
     </div>
   )
@@ -88,7 +88,7 @@ function TeamReportPanel({ teamMembers, db }) {
       <div className="card">
         <h3 className="font-bold text-gray-900 mb-4">Pairings</h3>
         {teamMembers.length < 2 ? (
-          <p className="text-sm text-gray-400">Add at least 2 members to see pairings.</p>
+          <p className="text-sm text-gray-500">Add at least 2 members to see pairings.</p>
         ) : (
           <div className="space-y-3">
             {teamMembers.flatMap((a, i) =>
@@ -99,7 +99,7 @@ function TeamReportPanel({ teamMembers, db }) {
                   <div key={`${a.name}-${b.name}`} className="border border-gray-200 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`badge-pill ${aCfg.bgLight} ${aCfg.text} text-xs`}>{a.name}</span>
-                      <span className="text-gray-400">×</span>
+                      <span className="text-gray-500">×</span>
                       <span className={`badge-pill ${bCfg.bgLight} ${bCfg.text} text-xs`}>{b.name}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
@@ -264,7 +264,7 @@ export default function TeamMode({ db, state, onUpdateState, onNavigate, showToa
 
       {state.teamMembers.length < 2 && state.teamMembers.length > 0 && (
         <div className="card bg-gray-50 text-center py-6">
-          <p className="text-gray-400 text-sm">Add at least 2 members to generate a team report.</p>
+          <p className="text-gray-500 text-sm">Add at least 2 members to generate a team report.</p>
         </div>
       )}
     </div>

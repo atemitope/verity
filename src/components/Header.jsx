@@ -55,8 +55,8 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
               </div>
             </div>
             {/* XP */}
-            <span className="hidden xs:inline-flex items-center gap-1 text-amber-600 font-semibold text-xs tnums bg-amber-50 ring-1 ring-amber-500/10 px-2.5 py-1 rounded-full">
-              <span className="text-amber-400">✦</span>{gamification.xp} XP
+            <span className="hidden xs:inline-flex items-center gap-1 text-amber-700 font-semibold text-xs tnums bg-amber-50 ring-1 ring-amber-500/10 px-2.5 py-1 rounded-full">
+              <span className="text-amber-500">✦</span>{gamification.xp} XP
             </span>
             {/* Tier badge */}
             {gamification.tier !== 'none' && (

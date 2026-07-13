@@ -69,9 +69,9 @@ export default function Achievements({ db, state, onNavigate }) {
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-gray-400 mt-1.5 tnums">
+        <div className="flex justify-between text-xs text-gray-500 mt-1.5 tnums">
           {[25, 50, 75, 100].map(m => (
-            <span key={m} className={progressPct >= m ? 'text-green-600 font-bold' : ''}>{m}%</span>
+            <span key={m} className={progressPct >= m ? 'text-green-700 font-bold' : ''}>{m}%</span>
           ))}
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function Achievements({ db, state, onNavigate }) {
                 <span className="text-2xl">{info.icon}</span>
                 <div className="flex-1">
                   <p className={`font-medium text-sm ${isUnlocked ? 'text-green-800' : 'text-gray-500'}`}>{tier.name}</p>
-                  <p className="text-xs text-gray-400">{tier.criteria}</p>
+                  <p className="text-xs text-gray-500">{tier.criteria}</p>
                 </div>
                 {isUnlocked && <span className="text-green-500 font-bold">✓</span>}
               </div>
@@ -126,10 +126,10 @@ export default function Achievements({ db, state, onNavigate }) {
                 }`}
               >
                 <div className="text-3xl mb-1.5">{earned ? BADGE_ICONS[badge.badge_id] : '🔒'}</div>
-                <p className={`font-bold text-sm ${earned ? 'text-amber-800' : 'text-gray-400'}`}>
+                <p className={`font-bold text-sm ${earned ? 'text-amber-800' : 'text-gray-500'}`}>
                   {badge.name}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">{badge.criteria}</p>
+                <p className="text-xs text-gray-500 mt-1">{badge.criteria}</p>
               </div>
             )
           })}
@@ -154,7 +154,7 @@ export default function Achievements({ db, state, onNavigate }) {
                 </div>
                 <div className="space-y-1">
                   {quest.steps.map((step, i) => (
-                    <div key={i} className={`flex items-center gap-2 text-sm ${i < progress ? 'text-green-600' : 'text-gray-400'}`}>
+                    <div key={i} className={`flex items-center gap-2 text-sm ${i < progress ? 'text-green-700' : 'text-gray-500'}`}>
                       <span>{i < progress ? '✓' : '○'}</span>
                       <span>{step}</span>
                     </div>
