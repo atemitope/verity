@@ -6,7 +6,7 @@ function TeamMemberCard({ member, db, onRemove }) {
   const cfg = colourConfig(member.scores.dominantColour)
   return (
     <div className={`card flex items-center gap-3 py-3.5 ${cfg.bgLight} ring-1 ${cfg.ring}`}>
-      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${cfg.gradient} flex items-center justify-center text-white font-bold shrink-0 shadow-sm`}>
+      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${cfg.hero} ${cfg.heroFg} flex items-center justify-center font-bold shrink-0 shadow-sm`}>
         {member.name[0].toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">

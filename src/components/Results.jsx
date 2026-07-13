@@ -40,23 +40,23 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
   return (
     <div className="animate-fade-in">
       {/* Hero result */}
-      <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${dominantCfg.gradient} text-white shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
+      <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${dominantCfg.hero} ${dominantCfg.heroFg} shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
         <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
           {dominantCfg.emoji}
         </div>
         <div className="text-center py-4 relative">
-          <p className="text-white/80 text-xs uppercase tracking-[0.15em] mb-2">Your dominant energy</p>
+          <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2`}>Your dominant energy</p>
           <h1 className="text-4xl sm:text-5xl font-bold mb-2 tracking-tight">
             {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
           </h1>
-          <p className="text-white/90 text-sm mb-4 max-w-md mx-auto leading-relaxed">{db.colours[scores.dominantColour].core_drive}</p>
+          <p className={`${dominantCfg.heroFgSoft} text-sm mb-4 max-w-md mx-auto leading-relaxed`}>{db.colours[scores.dominantColour].core_drive}</p>
           <div className="flex justify-center gap-3 text-sm">
-            <div className="bg-white/15 backdrop-blur-sm ring-1 ring-white/20 rounded-xl px-4 py-2">
-              <p className="text-white/70 text-xs mb-0.5">Secondary</p>
+            <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-2`}>
+              <p className={`${dominantCfg.heroFgSoft} text-xs mb-0.5`}>Secondary</p>
               <p className="font-semibold">{secondaryCfg.emoji} {db.colours[scores.secondaryColour].display_name}</p>
             </div>
-            <div className="bg-white/15 backdrop-blur-sm ring-1 ring-white/20 rounded-xl px-4 py-2">
-              <p className="text-white/70 text-xs mb-0.5">Confidence</p>
+            <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-2`}>
+              <p className={`${dominantCfg.heroFgSoft} text-xs mb-0.5`}>Confidence</p>
               <p className="font-semibold tnums">{scores.confidence}%</p>
             </div>
           </div>
@@ -184,7 +184,7 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
         </button>
         <button
           onClick={() => onNavigate('challenges')}
-          className="btn-primary bg-gradient-to-r from-orange-400 to-red-500 flex-1"
+          className="btn-primary bg-gradient-to-r from-orange-700 to-red-600 flex-1"
         >
           ⚡ Start Challenges
         </button>

@@ -2,9 +2,9 @@ import React from 'react'
 
 export default function MilestoneToast({ toast }) {
   const colors = {
-    success: 'from-green-500 to-emerald-600',
-    error: 'from-red-500 to-rose-600',
-    info: 'from-blue-500 to-indigo-600',
+    success: 'from-green-700 to-emerald-700',
+    error: 'from-red-600 to-rose-600',
+    info: 'from-blue-600 to-indigo-600',
   }
 
   return (

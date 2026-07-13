@@ -12,6 +12,11 @@ export const COLOUR_CONFIG = {
     emoji: '🔵',
     gradient: 'from-blue-400 to-blue-600',
     softGradient: 'from-blue-50 to-blue-100/60',
+    // Hero banner: deep enough that white text clears WCAG AA.
+    hero: 'from-blue-700 to-blue-900',
+    heroFg: 'text-white',
+    heroFgSoft: 'text-white/90',
+    heroChip: 'bg-white/10 ring-white/20',
   },
   earth_green: {
     bg: 'bg-green-500',
@@ -26,6 +31,10 @@ export const COLOUR_CONFIG = {
     emoji: '🟢',
     gradient: 'from-green-400 to-green-600',
     softGradient: 'from-green-50 to-green-100/60',
+    hero: 'from-green-700 to-green-900',
+    heroFg: 'text-white',
+    heroFgSoft: 'text-white/90',
+    heroChip: 'bg-white/10 ring-white/20',
   },
   sunshine_yellow: {
     bg: 'bg-yellow-400',
@@ -40,6 +49,11 @@ export const COLOUR_CONFIG = {
     emoji: '🟡',
     gradient: 'from-yellow-300 to-yellow-500',
     softGradient: 'from-yellow-50 to-yellow-100/60',
+    // Yellow is too light for white text — keep it bright and use near-black text.
+    hero: 'from-yellow-300 to-yellow-500',
+    heroFg: 'text-yellow-950',
+    heroFgSoft: 'text-yellow-950/80',
+    heroChip: 'bg-yellow-950/10 ring-yellow-950/20',
   },
   fiery_red: {
     bg: 'bg-red-500',
@@ -54,6 +68,10 @@ export const COLOUR_CONFIG = {
     emoji: '🔴',
     gradient: 'from-red-400 to-red-600',
     softGradient: 'from-red-50 to-red-100/60',
+    hero: 'from-red-600 to-red-800',
+    heroFg: 'text-white',
+    heroFgSoft: 'text-white/90',
+    heroChip: 'bg-white/10 ring-white/20',
   },
 };
 

@@ -36,15 +36,15 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
   return (
     <div className="animate-fade-in max-w-2xl mx-auto">
       {/* Cover */}
-      <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${domCfg.gradient} text-white text-center py-9 shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
-        <p className="text-white/80 text-xs uppercase tracking-[0.15em] mb-2 relative">Colour Spectrum Profile Report</p>
+      <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${domCfg.hero} ${domCfg.heroFg} text-center py-9 shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
+        <p className={`${domCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2 relative`}>Colour Spectrum Profile Report</p>
         <h1 className="text-3xl font-bold mb-2 tracking-tight relative">
           {domCfg.emoji} {domColour.display_name} · {secCfg.emoji} {secColour.display_name}
         </h1>
         {report.blurbLabel && (
-          <p className="text-white/90 text-lg font-medium mt-2 relative">{report.blurbLabel}</p>
+          <p className="text-lg font-medium mt-2 relative">{report.blurbLabel}</p>
         )}
-        <p className="text-white/70 text-xs mt-3 relative tnums">
+        <p className={`${domCfg.heroFgSoft} text-xs mt-3 relative tnums`}>
           Generated {new Date().toLocaleDateString()}
         </p>
       </div>
@@ -65,7 +65,7 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
         </button>
         <button
           onClick={() => onNavigate('challenges')}
-          className="btn-primary bg-gradient-to-r from-orange-400 to-red-500 text-sm"
+          className="btn-primary bg-gradient-to-r from-orange-700 to-red-600 text-sm"
         >
           ⚡ Start Challenges
         </button>
