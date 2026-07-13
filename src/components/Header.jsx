@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 const NAV_ITEMS = [
   { key: 'home', label: 'Home', icon: '🏠' },
@@ -173,8 +174,10 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
         </button>
       </div>
 
-      {/* Mobile bottom sheet */}
-      {menuOpen && (
+      {/* Mobile bottom sheet — portalled to <body>: the header's backdrop-blur
+          makes it a containing block for fixed descendants, which would anchor
+          (and clip) the sheet inside the header instead of the viewport. */}
+      {menuOpen && createPortal(
         <div className="sm:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Navigation menu">
           <div
             className="absolute inset-0 bg-gray-900/40 backdrop-blur-[1px] animate-fade-in"
@@ -226,7 +229,8 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
               })}
             </nav>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   )
