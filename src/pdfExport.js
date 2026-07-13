@@ -35,6 +35,27 @@ function hexToRgb(hex) {
   ]
 }
 
+/** WCAG relative luminance (0 dark – 1 light). */
+function relLum([r, g, b]) {
+  const f = (c) => {
+    c /= 255
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+}
+
+/** Legible ink for text sitting on `rgb`: near-black on light colours, white on dark. */
+function pickInk(rgb) {
+  return relLum(rgb) > 0.45 ? [23, 23, 23] : COLOURS.white
+}
+
+/** Darken a light brand colour so it stays visible as an accent on white paper. */
+function deepen(rgb) {
+  const lum = relLum(rgb)
+  const k = lum > 0.5 ? 0.6 : lum > 0.32 ? 0.78 : 1
+  return rgb.map((c) => Math.round(c * k))
+}
+
 /**
  * Build and trigger download of the report PDF.
  * @returns {string} the filename used.
@@ -78,19 +99,24 @@ export function exportReportPdf(state, db) {
     y += lineGap
   }
 
+  const accent = deepen(hexToRgb(domCfg.hex))
+
   function sectionHeading(title) {
     ensureSpace(30)
-    y += 6
+    y += 10
+    // Short colour accent bar sitting just left of the title.
+    doc.setFillColor(accent[0], accent[1], accent[2])
+    doc.roundedRect(MARGIN, y - 9, 3.5, 12, 1.5, 1.5, 'F')
     setFont(13, 'bold', COLOURS.ink)
-    doc.text(title, MARGIN, y)
-    y += 6
+    doc.text(title, MARGIN + 12, y)
+    y += 7
     doc.setDrawColor(COLOURS.line[0], COLOURS.line[1], COLOURS.line[2])
     doc.setLineWidth(0.75)
     doc.line(MARGIN, y, PAGE_W - MARGIN, y)
     y += 14
   }
 
-  function bullet(text, dotRgb = domCfg ? hexToRgb(domCfg.hex) : COLOURS.muted) {
+  function bullet(text, dotRgb = accent) {
     setFont(10, 'normal', COLOURS.ink)
     const indent = 16
     const lines = doc.splitTextToSize(String(text), CONTENT_W - indent)
@@ -107,20 +133,36 @@ export function exportReportPdf(state, db) {
   }
 
   // ---- cover banner --------------------------------------------------------
+  // Banner in the dominant colour; a slim secondary stripe on top for a two-tone
+  // accent. Text ink is chosen by luminance so it stays legible on any colour
+  // (e.g. near-black on Sunshine Yellow rather than unreadable white).
+  const BANNER_H = 140
   const banner = hexToRgb(domCfg.hex)
+  const secBanner = hexToRgb(secCfg.hex)
+  const ink = pickInk(banner)
+  const inkSoft = ink === COLOURS.white ? [255, 255, 255] : [60, 60, 60]
+
+  doc.setFillColor(secBanner[0], secBanner[1], secBanner[2])
+  doc.rect(0, 0, PAGE_W, 8, 'F')
   doc.setFillColor(banner[0], banner[1], banner[2])
-  doc.rect(0, 0, PAGE_W, 132, 'F')
-  setFont(10, 'normal', COLOURS.white)
-  doc.text('Colour Spectrum Profile Report', MARGIN, 46)
-  setFont(22, 'bold', COLOURS.white)
-  doc.text(`${domName}  ·  ${secName}`, MARGIN, 76)
+  doc.rect(0, 8, PAGE_W, BANNER_H - 8, 'F')
+
+  setFont(9, 'bold', inkSoft)
+  doc.setCharSpace(1.5)
+  doc.text('COLOUR SPECTRUM PROFILE REPORT', MARGIN, 48)
+  doc.setCharSpace(0)
+
+  setFont(26, 'bold', ink)
+  doc.text(domName, MARGIN, 82)
+  setFont(12, 'normal', inkSoft)
+  doc.text(`supported by ${secName}`, MARGIN, 102)
   if (report.blurbLabel) {
-    setFont(12, 'normal', COLOURS.white)
-    doc.text(String(report.blurbLabel), MARGIN, 98)
+    setFont(10, 'italic', inkSoft)
+    doc.text(String(report.blurbLabel), MARGIN, 120)
   }
-  setFont(9, 'normal', COLOURS.white)
-  doc.text(`Generated ${new Date().toLocaleDateString()}`, MARGIN, 118)
-  y = 132 + 28
+  setFont(8.5, 'normal', inkSoft)
+  doc.text(`Generated ${new Date().toLocaleDateString()}`, PAGE_W - MARGIN, 120, { align: 'right' })
+  y = BANNER_H + 30
 
   // ---- profile summary -----------------------------------------------------
   sectionHeading('Profile Summary')
@@ -139,12 +181,14 @@ export function exportReportPdf(state, db) {
     const score = scores.spectrumScores[c]
     const name = db.colours[c].display_name
     ensureSpace(30)
+    doc.setCharSpace(0)
     setFont(9.5, 'bold', COLOURS.ink)
     doc.text(name, MARGIN, y)
     setFont(9, 'normal', COLOURS.muted)
     const raw = scores.rawPoints[c]
     const max = scores.maxPoints[c]
-    const label = `${raw.toFixed(0)} / ${max.toFixed(0)} pts  →  ${score.toFixed(2)}/6`
+    // ASCII-only separator — jsPDF's built-in Helvetica has no arrow glyph.
+    const label = `${raw.toFixed(0)}/${max.toFixed(0)} pts   ${score.toFixed(2)}/6`
     doc.text(label, PAGE_W - MARGIN, y, { align: 'right' })
     y += 6
     // bar track
@@ -165,7 +209,7 @@ export function exportReportPdf(state, db) {
 
   // ---- strengths -----------------------------------------------------------
   sectionHeading('Strengths')
-  report.strengths.forEach((s) => bullet(s, hexToRgb(domCfg.hex)))
+  report.strengths.forEach((s) => bullet(s))
   paragraph(`3 from ${domName}, 2 from ${secName}`, { size: 8.5, rgb: COLOURS.faint, lineGap: 6 })
 
   // ---- challenges ----------------------------------------------------------
@@ -174,7 +218,7 @@ export function exportReportPdf(state, db) {
 
   // ---- communication tips --------------------------------------------------
   sectionHeading('Communication Tips')
-  report.commTips.forEach((s) => bullet(s, hexToRgb(secCfg.hex)))
+  report.commTips.forEach((s) => bullet(s, deepen(hexToRgb(secCfg.hex))))
 
   // ---- under pressure ------------------------------------------------------
   sectionHeading('Under Pressure')
@@ -185,20 +229,20 @@ export function exportReportPdf(state, db) {
 
   // ---- how to work with you ------------------------------------------------
   sectionHeading('How to Work With You')
-  report.howToWorkWith.forEach((s) => bullet(s, hexToRgb(domCfg.hex)))
+  report.howToWorkWith.forEach((s) => bullet(s))
 
   // ---- next steps ----------------------------------------------------------
   sectionHeading('Next Steps')
   report.nextSteps.forEach((step) => {
     const cfg = colourConfig(step.colour)
     const nm = db.colours[step.colour].display_name
-    paragraph(nm, { size: 9.5, style: 'bold', rgb: hexToRgb(cfg.hex), lineGap: 1 })
+    paragraph(nm, { size: 9.5, style: 'bold', rgb: deepen(hexToRgb(cfg.hex)), lineGap: 1 })
     paragraph(step.text, { size: 10, rgb: COLOURS.ink, lineGap: 7 })
   })
 
   // ---- 14-day experiment ---------------------------------------------------
   sectionHeading('14-Day Experiment')
-  paragraph(report.experiment.title, { size: 11, style: 'bold', rgb: hexToRgb(domCfg.hex), lineGap: 3 })
+  paragraph(report.experiment.title, { size: 11, style: 'bold', rgb: accent, lineGap: 3 })
   paragraph(report.experiment.description, { size: 10, rgb: COLOURS.ink, lineGap: 6 })
   const prompts = (db.reflection_prompts && db.reflection_prompts.weekly_checkin) || []
   if (prompts.length) {
