@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 const NAV_ITEMS = [
   { key: 'home', label: 'Home', icon: '🏠' },
@@ -16,9 +16,35 @@ const TIER_LABELS = {
   tier_leader: '👑 Leader',
 }
 
+function isItemLocked(state, key) {
+  return !state.assessmentComplete && ['results', 'report', 'challenges', 'achievements'].includes(key)
+}
+
 export default function Header({ state, db, onNavigate, progressPercent, levelProgress, user, onLogin, onLogout }) {
   const { gamification } = state
   const xpPerLevel = db.gamification.mechanics_catalogue.levels.xp_per_level
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  // Close the mobile sheet on Escape and lock body scroll while it is open.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false) }
+    document.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [menuOpen])
+
+  const activeItem = NAV_ITEMS.find((i) => i.key === state.view) || NAV_ITEMS[0]
+
+  const go = (key) => {
+    if (isItemLocked(state, key)) return
+    onNavigate(key)
+    setMenuOpen(false)
+  }
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/70 sticky top-0 z-40 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
@@ -100,15 +126,15 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex gap-1 overflow-x-auto pb-2 -mb-px scrollbar-hide">
+        {/* Desktop nav — full row (all 7 items fit at >=sm). */}
+        <nav className="hidden sm:flex gap-1 pb-2 -mb-px" aria-label="Primary">
           {NAV_ITEMS.map(item => {
             const isActive = state.view === item.key
-            const isLocked = !state.assessmentComplete && ['results', 'report', 'challenges', 'achievements'].includes(item.key)
+            const isLocked = isItemLocked(state, item.key)
             return (
               <button
                 key={item.key}
-                onClick={() => !isLocked && onNavigate(item.key)}
+                onClick={() => go(item.key)}
                 disabled={isLocked}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={isLocked ? `${item.label} (locked — complete the assessment first)` : item.label}
@@ -128,7 +154,80 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
             )
           })}
         </nav>
+
+        {/* Mobile nav trigger — opens the bottom sheet below. */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={menuOpen}
+          className="sm:hidden flex items-center gap-2 w-full mb-2 px-3 py-2 rounded-xl bg-gray-100/80 text-gray-800 text-sm font-medium
+            transition-[transform,background-color] duration-150 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+        >
+          <span aria-hidden="true">{activeItem.icon}</span>
+          <span className="font-semibold">{activeItem.label}</span>
+          <span className="ml-auto flex items-center gap-1.5 text-gray-500 text-xs">
+            Menu
+            <span aria-hidden="true" className="text-base leading-none">☰</span>
+          </span>
+        </button>
       </div>
+
+      {/* Mobile bottom sheet */}
+      {menuOpen && (
+        <div className="sm:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Navigation menu">
+          <div
+            className="absolute inset-0 bg-gray-900/40 backdrop-blur-[1px] animate-fade-in"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-[0_-8px_40px_-8px_rgba(16,24,40,0.4)]
+              px-3 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] animate-sheet-up overscroll-contain
+              max-h-[80dvh] overflow-y-auto"
+          >
+            <div className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-gray-200" aria-hidden="true" />
+            <div className="flex items-center justify-between px-1 pb-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Go to</span>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+                className="text-gray-500 hover:text-gray-900 text-sm px-2 py-1 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+              >
+                Close
+              </button>
+            </div>
+            <nav className="flex flex-col gap-1" aria-label="Primary">
+              {NAV_ITEMS.map(item => {
+                const isActive = state.view === item.key
+                const isLocked = isItemLocked(state, item.key)
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => go(item.key)}
+                    disabled={isLocked}
+                    aria-current={isActive ? 'page' : undefined}
+                    aria-label={isLocked ? `${item.label} (locked — complete the assessment first)` : item.label}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium text-left
+                      transition-[background-color,transform] duration-150 active:scale-[0.99]
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
+                      ${isActive
+                        ? 'bg-gray-900 text-white'
+                        : 'text-gray-700 hover:bg-gray-100'}
+                      ${isLocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
+                    `}
+                  >
+                    <span className="text-lg leading-none" aria-hidden="true">{item.icon}</span>
+                    <span>{item.label}</span>
+                    {isLocked && <span className="ml-auto text-xs" aria-hidden="true">🔒</span>}
+                    {isActive && <span className="ml-auto text-xs" aria-hidden="true">●</span>}
+                  </button>
+                )
+              })}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

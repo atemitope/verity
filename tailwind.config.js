@@ -39,6 +39,7 @@ export default {
         'bounce-soft': 'bounceSoft 0.6s ease-out',
         'scale-in': 'scaleIn 0.32s cubic-bezier(0.22, 1, 0.36, 1)',
         'float-soft': 'floatSoft 4s ease-in-out infinite',
+        'sheet-up': 'sheetUp 0.30s cubic-bezier(0.22, 1, 0.36, 1)',
       },
       keyframes: {
         fadeIn: {
@@ -65,6 +66,10 @@ export default {
         floatSoft: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },
+        },
+        sheetUp: {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
         },
       },
       boxShadow: {
