@@ -17,6 +17,9 @@ export const COLOUR_CONFIG = {
     heroFg: 'text-white',
     heroFgSoft: 'text-white/90',
     heroChip: 'bg-white/10 ring-white/20',
+    // Solid fill + legible label for buttons/pills (WCAG AA on the fill).
+    solid: 'bg-blue-600',
+    solidFg: 'text-white',
   },
   earth_green: {
     bg: 'bg-green-500',
@@ -35,6 +38,8 @@ export const COLOUR_CONFIG = {
     heroFg: 'text-white',
     heroFgSoft: 'text-white/90',
     heroChip: 'bg-white/10 ring-white/20',
+    solid: 'bg-green-700',
+    solidFg: 'text-white',
   },
   sunshine_yellow: {
     bg: 'bg-yellow-400',
@@ -54,6 +59,9 @@ export const COLOUR_CONFIG = {
     heroFg: 'text-yellow-950',
     heroFgSoft: 'text-yellow-950/80',
     heroChip: 'bg-yellow-950/10 ring-yellow-950/20',
+    // Bright yellow fill needs dark ink, not white (9.5:1 vs 1.5:1).
+    solid: 'bg-yellow-400',
+    solidFg: 'text-yellow-950',
   },
   fiery_red: {
     bg: 'bg-red-500',
@@ -72,6 +80,8 @@ export const COLOUR_CONFIG = {
     heroFg: 'text-white',
     heroFgSoft: 'text-white/90',
     heroChip: 'bg-white/10 ring-white/20',
+    solid: 'bg-red-600',
+    solidFg: 'text-white',
   },
 };
 

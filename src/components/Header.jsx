@@ -112,7 +112,7 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
                 disabled={isLocked}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={isLocked ? `${item.label} (locked — complete the assessment first)` : item.label}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap
                   transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-[0.97]
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
                   ${isActive
@@ -122,8 +122,8 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
                 `}
               >
                 <span aria-hidden="true">{item.icon}</span>
-                <span className="hidden sm:inline">{item.label}</span>
-                {isLocked && <span className="hidden sm:inline text-[10px]" aria-hidden="true">🔒</span>}
+                <span>{item.label}</span>
+                {isLocked && <span className="text-[10px]" aria-hidden="true">🔒</span>}
               </button>
             )
           })}

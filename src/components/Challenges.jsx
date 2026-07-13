@@ -53,7 +53,7 @@ function ChallengeCard({ challenge, colourKey, db, completed, onComplete }) {
             <button
               onClick={handleSubmit}
               disabled={!note.trim()}
-              className="btn-primary bg-green-500 text-sm py-1.5 px-4 disabled:opacity-50"
+              className="btn-primary bg-green-700 text-sm py-1.5 px-4 disabled:opacity-50"
             >
               Submit ✓
             </button>
@@ -68,7 +68,7 @@ function ChallengeCard({ challenge, colourKey, db, completed, onComplete }) {
       ) : (
         <button
           onClick={() => setShowInput(true)}
-          className={`btn-primary ${cfg.bg} text-sm py-1.5 px-4`}
+          className={`btn-primary ${cfg.solid} ${cfg.solidFg} text-sm py-1.5 px-4`}
         >
           Mark Complete
         </button>
@@ -139,7 +139,7 @@ export default function Challenges({ db, state, onComplete, onNavigate }) {
             <button
               key={c}
               onClick={() => setFilter(c)}
-              className={`badge-pill whitespace-nowrap transition-[transform,background-color] duration-150 active:scale-[0.96] ${filter === c ? `${cfg.bg} text-white shadow-sm` : `${cfg.bgLight} ${cfg.text} hover:brightness-95`}`}
+              className={`badge-pill whitespace-nowrap transition-[transform,background-color] duration-150 active:scale-[0.96] ${filter === c ? `${cfg.solid} ${cfg.solidFg} shadow-sm` : `${cfg.bgLight} ${cfg.text} hover:brightness-95`}`}
             >
               {cfg.emoji} {db.colours[c].display_name}
             </button>

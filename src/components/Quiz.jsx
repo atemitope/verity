@@ -129,7 +129,7 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
                   }`}
               >
                 <span className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 tnums transition-colors duration-150
-                  ${currentResponse === val ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-700'}`}>
+                  ${currentResponse === val ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-700'}`}>
                   {val}
                 </span>
                 <span className="text-sm">{LIKERT_LABELS[val - 1]}</span>
@@ -162,7 +162,7 @@ export default function Quiz({ db, state, onComplete, onUpdateState }) {
                     }`}
                 >
                   <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs
-                    ${currentResponse === optKey ? `${cfg.bg} text-white` : 'bg-gray-100 text-gray-500'}`}>
+                    ${currentResponse === optKey ? `${cfg.solid} ${cfg.solidFg}` : 'bg-gray-100 text-gray-500'}`}>
                     {optKey}
                   </span>
                   <span className="text-sm leading-relaxed pt-0.5">{optText}</span>
