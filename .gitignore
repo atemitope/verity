@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Env / secrets
+.env
+.env.local
+*.local
+
+# Editor / OS
+.DS_Store
+
+# Agent worktrees
+.claude/worktrees/

@@ -1,0 +1,20 @@
+{
+  "name": "colour-spectrum-profile-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Express backend: Google OAuth auth + per-user state persistence for Colour Spectrum Profile",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "arctic": "^2.3.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jose": "^5.9.6",
+    "pg": "^8.13.1"
+  }
+}

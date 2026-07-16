@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { loadState, saveState, createInitialState } from './storage'
+import { fetchMe, getServerState, putServerState, login as authLogin, logout as authLogout } from './auth'
 import { computeScores, generateReport } from './scoring'
 import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent, getLevelProgress } from './gamification'
 import Header from './components/Header'
@@ -17,6 +18,13 @@ export default function App() {
   const [state, setState] = useState(null)
   const [toast, setToast] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null)
+
+  // Refs for server-sync coordination (auth is additive; anonymous flow is unchanged).
+  const stateRef = useRef(null)
+  const adoptedRef = useRef(false)   // has this session reconciled with the server yet?
+  const syncReadyRef = useRef(false) // safe to start pushing local changes upstream?
+  const syncTimer = useRef(null)
 
   // Load database
   useEffect(() => {
@@ -34,7 +42,17 @@ export default function App() {
       })
   }, [])
 
-  // Persist state
+  // Detect an existing session on load (null when signed out — flow stays on-device).
+  useEffect(() => {
+    fetchMe().then(setUser)
+  }, [])
+
+  // Keep a live ref to state for the adoption effect below.
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
+
+  // Persist state locally on every change (offline / anonymous default: on-device).
   useEffect(() => {
     if (state) saveState(state)
   }, [state])
@@ -54,6 +72,31 @@ export default function App() {
   const navigate = useCallback((view) => {
     updateState({ view })
   }, [updateState])
+
+  // On sign-in, reconcile with the account: server state is the source of truth
+  // across devices; if the account has none yet, seed it from local state.
+  // (Declared after showToast so it isn't referenced before initialization.)
+  useEffect(() => {
+    if (!user || adoptedRef.current) return
+    adoptedRef.current = true
+    getServerState().then(serverState => {
+      if (serverState) {
+        setState(serverState)
+        showToast('Synced your profile from your account', 'info')
+      } else if (stateRef.current) {
+        putServerState(stateRef.current)
+      }
+      syncReadyRef.current = true
+    })
+  }, [user, showToast])
+
+  // While signed in, debounce-push local changes up to the account.
+  useEffect(() => {
+    if (!user || !state || !syncReadyRef.current) return
+    clearTimeout(syncTimer.current)
+    syncTimer.current = setTimeout(() => { putServerState(state) }, 800)
+    return () => clearTimeout(syncTimer.current)
+  }, [state, user])
 
   const handleQuizComplete = useCallback((responses) => {
     if (!db) return
@@ -83,6 +126,14 @@ export default function App() {
     }
   }, [state, db])
 
+  // Shared gamification side-effect for any export path (JSON or PDF).
+  const awardExportXp = useCallback(() => {
+    let newState = { ...state, exportedReport: true }
+    newState = awardXP(newState, db, 'export_report')
+    newState = checkBadges(newState, db)
+    setState(newState)
+  }, [state, db])
+
   const handleExport = useCallback(() => {
     if (!state.scores) return
     const payload = {
@@ -99,18 +150,40 @@ export default function App() {
     a.click()
     URL.revokeObjectURL(url)
 
-    let newState = { ...state, exportedReport: true }
-    newState = awardXP(newState, db, 'export_report')
-    newState = checkBadges(newState, db)
-    setState(newState)
+    awardExportXp()
     showToast('Report exported! +50 XP', 'success')
-  }, [state, db, showToast])
+  }, [state, awardExportXp, showToast])
+
+  const handleExportPdf = useCallback(async () => {
+    if (!state.scores || !state.report) return
+    try {
+      // Lazy-load the PDF module (and jsPDF) so it stays out of the initial bundle.
+      const { exportReportPdf } = await import('./pdfExport')
+      exportReportPdf(state, db)
+    } catch (err) {
+      console.error('PDF export failed:', err)
+      showToast('PDF export failed. Please try again.', 'error')
+      return
+    }
+    awardExportXp()
+    showToast('PDF downloaded! +50 XP', 'success')
+  }, [state, db, awardExportXp, showToast])
 
   const handleCompleteChallenge = useCallback((challengeId, outcomeNote) => {
     let newState = completeChallenge(state, db, challengeId, outcomeNote)
     setState(newState)
     showToast('Challenge complete! +150 XP', 'success')
   }, [state, db, showToast])
+
+  const handleLogin = useCallback(() => authLogin(), [])
+
+  const handleLogout = useCallback(async () => {
+    await authLogout()
+    setUser(null)
+    adoptedRef.current = false
+    syncReadyRef.current = false
+    showToast('Signed out', 'info')
+  }, [showToast])
 
   const handleReset = useCallback(() => {
     if (window.confirm('Reset your profile? All progress will be lost.')) {
@@ -121,10 +194,13 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-700">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
         <div className="text-center text-white">
-          <div className="text-5xl mb-4 animate-bounce-soft">🌈</div>
-          <p className="text-xl font-light">Loading Colour Spectrum Profile…</p>
+          <div className="text-6xl mb-5 animate-float-soft drop-shadow-lg">🌈</div>
+          <p className="text-lg font-light tracking-wide text-white/90">Loading Colour Spectrum Profile…</p>
+          <div className="mt-5 mx-auto w-40 h-1 rounded-full overflow-hidden bg-white/15">
+            <div className="h-full w-1/2 rounded-full bg-gradient-to-r from-blue-400 via-yellow-300 to-red-400 animate-pulse-soft" />
+          </div>
         </div>
       </div>
     )
@@ -132,7 +208,7 @@ export default function App() {
 
   if (!db || !state) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[100dvh] flex items-center justify-center">
         <p className="text-red-500">Failed to load. Please refresh.</p>
       </div>
     )
@@ -142,16 +218,19 @@ export default function App() {
   const levelProgress = getLevelProgress(state, db)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-[100dvh] bg-[#f6f7f9] antialiased">
       <Header
         state={state}
         db={db}
         onNavigate={navigate}
         progressPercent={progressPercent}
         levelProgress={levelProgress}
+        user={user}
+        onLogin={handleLogin}
+        onLogout={handleLogout}
       />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 sm:py-10">
         {state.view === 'home' && (
           <Home db={db} state={state} onStart={() => navigate('quiz')} onNavigate={navigate} />
         )}
@@ -176,6 +255,7 @@ export default function App() {
             db={db}
             state={state}
             onExport={handleExport}
+            onExportPdf={handleExportPdf}
             onNavigate={navigate}
           />
         )}
@@ -202,12 +282,17 @@ export default function App() {
       </main>
 
       {/* Disclaimer */}
-      <footer className="text-center text-xs text-gray-400 pb-8 px-4">
-        Colour Spectrum Profile is a behavioural preference tool for self-awareness and development.
-        It is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.
+      <footer className="max-w-4xl mx-auto px-4 pb-10">
+        <div className="border-t border-gray-200/70 pt-6 text-center text-xs leading-relaxed text-gray-500 max-w-2xl mx-auto">
+          Colour Spectrum Profile is a behavioural preference tool for self-awareness and development.
+          It is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.
+        </div>
       </footer>
 
       {toast && <MilestoneToast toast={toast} />}
+
+      {/* Subtle grain to give flat surfaces depth (fixed, non-interactive). */}
+      <div aria-hidden="true" className="noise-overlay" />
     </div>
   )
 }
