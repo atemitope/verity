@@ -12,18 +12,18 @@ const DISCOVER = [
   'Optional team mode for group insights',
 ]
 
-/** One colour energy: a real swatch, the name, and its core drive from db.json. */
-function EnergyRow({ colourKey, db }) {
+/**
+ * One colour energy. The swatch is a full-height bar with no gap above or
+ * below, so the four rows stack into a single continuous spectrum down the
+ * panel's edge, which is the idea the whole product rests on.
+ */
+function EnergyRow({ colourKey, db, first }) {
   const colour = db.colours[colourKey]
   const cfg = colourConfig(colourKey)
   return (
-    <div className="flex items-start gap-3.5 p-4">
-      <span
-        aria-hidden="true"
-        className="mt-0.5 h-9 w-9 shrink-0 rounded-lg ring-1 ring-inset ring-gray-900/10"
-        style={{ backgroundColor: cfg.hex }}
-      />
-      <div className="min-w-0">
+    <div className="flex items-stretch">
+      <span aria-hidden="true" className="w-2 shrink-0" style={{ backgroundColor: cfg.hex }} />
+      <div className={`min-w-0 flex-1 p-4 ${first ? '' : 'border-t border-gray-100'}`}>
         <h3 className={`text-sm font-semibold ${cfg.textDark}`}>{colour.display_name}</h3>
         <p className="mt-0.5 text-xs leading-relaxed text-gray-600">{colour.core_drive}</p>
       </div>
@@ -34,19 +34,22 @@ function EnergyRow({ colourKey, db }) {
 export default function Home({ db, state, onStart, onNavigate }) {
   const hasResults = !!state.scores
   const colourKeys = db.scoring.colour_keys
+  // Real count, derived the same way the quiz runner does it.
+  const itemCount = db.questionnaire.items.length
 
   return (
     <div className="animate-fade-in">
-      {/* Hero. Asymmetric split: the copy leads, the four energies carry the
-          visual instead of a decorative graphic. Collapses to one column < md. */}
-      <section className="grid items-center gap-10 pb-14 pt-2 md:grid-cols-[1.05fr_0.95fr] md:gap-12">
+      {/* Hero. Asymmetric split: the value prop leads (the brand wordmark already
+          sits in the header), the four energies carry the visual instead of a
+          decorative graphic. Collapses to one column < md. */}
+      <section className="grid items-center gap-10 pb-14 pt-2 md:grid-cols-[1.1fr_0.9fr] md:gap-12">
         <div className="stagger">
-          <h1 className="mb-4 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Verity
+          <h1 className="mb-5 text-4xl font-bold leading-[1.1] tracking-tight text-gray-900 sm:text-5xl">
+            Know how you actually work.
           </h1>
-          <p className="mb-8 max-w-[44ch] text-lg leading-relaxed text-gray-600">
-            Discover your behavioural preferences through four colour energies.
-            Build self-awareness and unlock practical tools for growth.
+          <p className="mb-8 max-w-[46ch] text-lg leading-relaxed text-gray-600">
+            A {itemCount}-question assessment maps your behavioural preferences across four
+            colour energies, then turns them into practical next steps.
           </p>
 
           <div>
@@ -83,9 +86,9 @@ export default function Home({ db, state, onStart, onNavigate }) {
             and swatched with the real brand colour instead of an emoji. */}
         <div>
           <h2 className="sr-only">The four colour energies</h2>
-          <div className="divide-y divide-gray-100 rounded-2xl bg-white shadow-card ring-1 ring-gray-900/[0.05]">
-            {colourKeys.map((key) => (
-              <EnergyRow key={key} colourKey={key} db={db} />
+          <div className="overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-gray-900/[0.05]">
+            {colourKeys.map((key, i) => (
+              <EnergyRow key={key} colourKey={key} db={db} first={i === 0} />
             ))}
           </div>
         </div>
