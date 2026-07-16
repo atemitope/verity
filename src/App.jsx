@@ -4,6 +4,7 @@ import { fetchMe, getServerState, putServerState, login as authLogin, logout as 
 import { computeScores, generateReport } from './scoring'
 import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent, getLevelProgress } from './gamification'
 import Header from './components/Header'
+import Logo from './components/Logo'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
 import Results from './components/Results'
@@ -146,7 +147,7 @@ export default function App() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'colour-spectrum-profile.json'
+    a.download = 'verity-profile.json'
     a.click()
     URL.revokeObjectURL(url)
 
@@ -196,8 +197,8 @@ export default function App() {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
         <div className="text-center text-white">
-          <div className="text-6xl mb-5 animate-float-soft drop-shadow-lg">🌈</div>
-          <p className="text-lg font-light tracking-wide text-white/90">Loading Colour Spectrum Profile…</p>
+          <Logo className="w-16 h-16 mx-auto mb-5 animate-float-soft drop-shadow-lg" />
+          <p className="text-lg font-light tracking-wide text-white/90">Loading Verity…</p>
           <div className="mt-5 mx-auto w-40 h-1 rounded-full overflow-hidden bg-white/15">
             <div className="h-full w-1/2 rounded-full bg-gradient-to-r from-blue-400 via-yellow-300 to-red-400 animate-pulse-soft" />
           </div>
@@ -284,7 +285,7 @@ export default function App() {
       {/* Disclaimer */}
       <footer className="max-w-4xl mx-auto px-4 pb-10">
         <div className="border-t border-gray-200/70 pt-6 text-center text-xs leading-relaxed text-gray-500 max-w-2xl mx-auto">
-          Colour Spectrum Profile is a behavioural preference tool for self-awareness and development.
+          Verity is a behavioural preference tool for self-awareness and development.
           It is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.
         </div>
       </footer>

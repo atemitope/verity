@@ -37,7 +37,7 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
     <div className="animate-fade-in max-w-2xl mx-auto">
       {/* Cover */}
       <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${domCfg.hero} ${domCfg.heroFg} text-center py-9 shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
-        <p className={`${domCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2 relative`}>Colour Spectrum Profile Report</p>
+        <p className={`${domCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2 relative`}>Verity Report</p>
         <h1 className="text-3xl font-bold mb-2 tracking-tight relative">
           {domCfg.emoji} {domColour.display_name} · {secCfg.emoji} {secColour.display_name}
         </h1>

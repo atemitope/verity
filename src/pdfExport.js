@@ -1,5 +1,5 @@
 /**
- * Client-side PDF export of the Colour Spectrum Profile report.
+ * Client-side PDF export of the Verity report.
  *
  * Renders a vector/text PDF (selectable text) from the already-generated
  * `report` (state.report) and `scores` (state.scores) objects plus `db`.
@@ -149,7 +149,7 @@ export function exportReportPdf(state, db) {
 
   setFont(9, 'bold', inkSoft)
   doc.setCharSpace(1.5)
-  doc.text('COLOUR SPECTRUM PROFILE REPORT', MARGIN, 48)
+  doc.text('VERITY REPORT', MARGIN, 48)
   doc.setCharSpace(0)
 
   setFont(26, 'bold', ink)
@@ -257,7 +257,7 @@ export function exportReportPdf(state, db) {
   const disclaimer =
     'Disclaimer: This report is generated from a self-reported behavioural preference questionnaire. ' +
     'It is intended as a tool for self-awareness and professional development, not a clinical or psychological assessment. ' +
-    'Colour Spectrum Profile is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.'
+    'Verity is not a clinical instrument and is not the proprietary Insights Discovery® Preference Evaluator.'
   setFont(8, 'normal', COLOURS.amberInk)
   const dLines = doc.splitTextToSize(disclaimer, CONTENT_W - 20)
   const boxH = dLines.length * (8 * 1.25) + 18
@@ -277,14 +277,14 @@ export function exportReportPdf(state, db) {
     doc.setPage(i)
     setFont(8, 'normal', COLOURS.faint)
     doc.text(
-      `Colour Spectrum Profile  ·  Page ${i} of ${pageCount}`,
+      `Verity  ·  Page ${i} of ${pageCount}`,
       PAGE_W / 2,
       PAGE_H - 24,
       { align: 'center' }
     )
   }
 
-  const filename = 'colour-spectrum-profile.pdf'
+  const filename = 'verity-profile.pdf'
   doc.save(filename)
   return filename
 }
