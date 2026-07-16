@@ -1,9 +1,9 @@
 {
-  "name": "colour-spectrum-profile-server",
+  "name": "verity-server",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Express backend: Google OAuth auth + per-user state persistence for Colour Spectrum Profile",
+  "description": "Express backend: Google OAuth auth + per-user state persistence for Verity",
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js"

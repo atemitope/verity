@@ -213,7 +213,7 @@ export default function TeamMode({ db, state, onUpdateState, onNavigate, showToa
                 className="mt-1"
               />
               <span className="text-sm text-gray-600">
-                I consent to sharing my Colour Spectrum Profile results in this team session for the purpose of team development.
+                I consent to sharing my Verity results in this team session for the purpose of team development.
               </span>
             </label>
             <button

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import Logo from './Logo'
 
 const NAV_ITEMS = [
   { key: 'home', label: 'Home', icon: '🏠' },
@@ -62,11 +63,11 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
         <div className="flex items-center justify-between gap-3 py-2.5">
           <button
             onClick={() => onNavigate('home')}
-            aria-label="Colour Spectrum — go to home"
+            aria-label="Verity — go to home"
             className="group flex items-center gap-2 font-bold text-gray-900 transition-transform duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 rounded-lg -mx-1 px-1"
           >
-            <span className="text-xl transition-transform duration-300 group-hover:rotate-12" aria-hidden="true">🌈</span>
-            <span className="text-sm font-semibold tracking-tight hidden sm:block">Colour Spectrum</span>
+            <Logo className="w-6 h-6 transition-transform duration-300 group-hover:rotate-45" />
+            <span className="text-base font-semibold tracking-tight hidden sm:block">Verity</span>
           </button>
 
           {/* Right cluster: gamification stats. Auth control (Sign in / account chip)

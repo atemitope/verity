@@ -1,5 +1,6 @@
 import React from 'react'
 import { colourConfig } from '../colours'
+import Logo from './Logo'
 
 const COLOUR_CARDS = [
   { key: 'cool_blue', icon: '🔵' },
@@ -15,9 +16,9 @@ export default function Home({ db, state, onStart, onNavigate }) {
     <div className="animate-fade-in">
       {/* Hero */}
       <div className="stagger text-center pt-8 pb-12 px-4">
-        <div className="text-7xl mb-5 inline-block animate-float-soft drop-shadow-sm">🌈</div>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900 mb-4">
-          Colour Spectrum Profile
+        <Logo className="w-20 h-20 mx-auto mb-5 animate-float-soft drop-shadow-sm" />
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-gray-900 mb-4">
+          Verity
         </h1>
         <p className="text-lg text-gray-500 max-w-xl mx-auto mb-8 leading-relaxed">
           Discover your behavioural preferences through four colour energies.
