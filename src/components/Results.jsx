@@ -29,7 +29,7 @@ function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
 
 export default function Results({ db, state, onViewReport, onNavigate }) {
   const { scores } = state
-  const [showExplainer, setShowExplainer] = useState(false)
+  const [showExplainer, setShowExplainer] = useState(!!state.preferences?.explainerDefaultOpen)
 
   const colours = db.scoring.colour_keys
   const sorted = scores.sortedColours

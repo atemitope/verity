@@ -43,5 +43,9 @@ export function createInitialState() {
     assessmentComplete: false,
     reportRead: false,
     exportedReport: false,
+    preferences: {
+      reducedMotion: 'system', // 'system' | 'reduced' | 'full'
+      explainerDefaultOpen: false,
+    },
   };
 }

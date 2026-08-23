@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { loadState, saveState, createInitialState } from './storage'
-import { fetchMe, getServerState, putServerState, login as authLogin, logout as authLogout } from './auth'
+import { loadState, saveState, clearState, createInitialState } from './storage'
+import { fetchMe, getServerState, putServerState, login as authLogin, logout as authLogout, deleteAccount as authDeleteAccount } from './auth'
 import { computeScores, generateReport } from './scoring'
 import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent, getLevelProgress } from './gamification'
 import Header from './components/Header'
 import Logo from './components/Logo'
+import Profile from './components/Profile'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
 import Results from './components/Results'
@@ -13,6 +14,15 @@ import Achievements from './components/Achievements'
 import Challenges from './components/Challenges'
 import TeamMode from './components/TeamMode'
 import MilestoneToast from './components/MilestoneToast'
+
+// Saved state (localStorage or an existing account) may predate a field
+// that's since been added to createInitialState() — merge in defaults for
+// anything missing rather than let a stale blob crash on the new fields.
+function withDefaults(saved) {
+  if (!saved) return createInitialState()
+  const defaults = createInitialState()
+  return { ...defaults, ...saved, preferences: { ...defaults.preferences, ...saved.preferences } }
+}
 
 export default function App() {
   const [db, setDb] = useState(null)
@@ -33,8 +43,7 @@ export default function App() {
       .then(r => r.json())
       .then(data => {
         setDb(data)
-        const saved = loadState()
-        setState(saved || createInitialState())
+        setState(withDefaults(loadState()))
         setLoading(false)
       })
       .catch(err => {
@@ -57,6 +66,18 @@ export default function App() {
   useEffect(() => {
     if (state) saveState(state)
   }, [state])
+
+  // Bridge the reduced-motion preference to a DOM attribute the CSS keys off
+  // (see the guarded @media block in index.css). Omitted for 'system' so the
+  // OS setting alone decides, matching the previous default behaviour.
+  useEffect(() => {
+    const value = state?.preferences?.reducedMotion
+    if (value === 'reduced' || value === 'full') {
+      document.documentElement.dataset.motion = value
+    } else {
+      delete document.documentElement.dataset.motion
+    }
+  }, [state?.preferences?.reducedMotion])
 
   const updateState = useCallback((updates) => {
     setState(prev => {
@@ -82,7 +103,14 @@ export default function App() {
     adoptedRef.current = true
     getServerState().then(serverState => {
       if (serverState) {
-        setState(serverState)
+        // Fill in any fields an older saved blob predates (e.g. accounts
+        // that synced before `preferences` existed).
+        const merged = withDefaults(serverState)
+        // Preferences are device-local settings, not quiz progress — the
+        // local choice wins over whatever the account previously had, so
+        // adopting server state can't silently discard it.
+        merged.preferences = stateRef.current?.preferences ?? merged.preferences
+        setState(merged)
         showToast('Synced your profile from your account', 'info')
       } else if (stateRef.current) {
         putServerState(stateRef.current)
@@ -188,10 +216,26 @@ export default function App() {
 
   const handleReset = useCallback(() => {
     if (window.confirm('Reset your profile? All progress will be lost.')) {
-      setState(createInitialState())
+      // Preferences are settings, not progress — keep them through a reset.
+      setState({ ...createInitialState(), preferences: state.preferences })
       showToast('Profile reset', 'info')
     }
-  }, [showToast])
+  }, [state, showToast])
+
+  const handleDeleteAccount = useCallback(async () => {
+    const ok = await authDeleteAccount()
+    if (!ok) {
+      showToast('Failed to delete account. Please try again.', 'error')
+      return
+    }
+    clearState()
+    setUser(null)
+    adoptedRef.current = false
+    syncReadyRef.current = false
+    setState(createInitialState())
+    navigate('home')
+    showToast('Account deleted', 'info')
+  }, [showToast, navigate])
 
   if (loading) {
     return (
@@ -278,6 +322,19 @@ export default function App() {
             onUpdateState={updateState}
             onNavigate={navigate}
             showToast={showToast}
+          />
+        )}
+        {state.view === 'profile' && (
+          <Profile
+            db={db}
+            state={state}
+            user={user}
+            onUpdateState={updateState}
+            onLogin={handleLogin}
+            onLogout={handleLogout}
+            onReset={handleReset}
+            onDeleteAccount={handleDeleteAccount}
+            onNavigate={navigate}
           />
         )}
       </main>

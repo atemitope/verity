@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { Google, generateState, generateCodeVerifier } from 'arctic';
 import { decodeJwt } from 'jose';
 import { query } from './db.js';
-import { setSessionCookie, clearSessionCookie, getSessionUserId } from './session.js';
+import { setSessionCookie, clearSessionCookie, getSessionUserId, requireAuth } from './session.js';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -95,6 +95,19 @@ router.get('/me', async (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
+  clearSessionCookie(res);
+  res.status(204).end();
+});
+
+// Permanently delete the account and all its data (cascades to user_state).
+// Only clear the session cookie once the delete has actually succeeded.
+router.delete('/me', requireAuth, async (req, res) => {
+  try {
+    await query('DELETE FROM users WHERE id = $1', [req.userId]);
+  } catch (err) {
+    console.error('[auth] account deletion failed:', err);
+    return res.status(500).json({ error: 'Failed to delete account. Please try again.' });
+  }
   clearSessionCookie(res);
   res.status(204).end();
 });
