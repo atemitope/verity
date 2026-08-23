@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Express backend: Google OAuth auth + per-user state persistence for Verity",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js"
