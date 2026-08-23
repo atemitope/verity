@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { colourConfig } from '../colours'
+import { getShareStatus, createShareLink, revokeShareLink } from '../share'
 
 const MOTION_OPTIONS = [
   { value: 'system', label: 'System', hint: 'Follow your device setting' },
@@ -6,10 +8,24 @@ const MOTION_OPTIONS = [
   { value: 'full', label: 'Full', hint: 'Always show animations' },
 ]
 
+const TIER_LABELS = {
+  tier_explorer: '🧭 Explorer',
+  tier_builder: '🔨 Builder',
+  tier_leader: '👑 Leader',
+}
+
 export default function Profile({ db, state, user, onUpdateState, onLogin, onLogout, onReset, onDeleteAccount, onNavigate }) {
-  const { preferences } = state
+  const { preferences, scores, gamification } = state
   const [confirmText, setConfirmText] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [shareToken, setShareToken] = useState(null)
+  const [shareLoading, setShareLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!user) { setShareToken(null); return }
+    getShareStatus().then(t => setShareToken(t))
+  }, [user])
 
   const setPreference = (key, value) => {
     onUpdateState({ preferences: { ...preferences, [key]: value } })
@@ -24,9 +40,77 @@ export default function Profile({ db, state, user, onUpdateState, onLogin, onLog
     setDeleting(false)
   }
 
+  const shareUrl = shareToken ? `${window.location.origin}/share/${shareToken}` : null
+
+  const handleCreateShare = async () => {
+    setShareLoading(true)
+    const token = await createShareLink()
+    setShareToken(token)
+    setShareLoading(false)
+  }
+
+  const handleRevokeShare = async () => {
+    setShareLoading(true)
+    const ok = await revokeShareLink()
+    if (ok) setShareToken(null)
+    setShareLoading(false)
+  }
+
+  const handleCopyShare = async () => {
+    if (!shareUrl) return
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard permission denied or unavailable — the URL is still
+      // shown in the input for manual copy, so this is a soft failure.
+    }
+  }
+
+  const dominantCfg = scores ? colourConfig(scores.dominantColour) : null
+
   return (
     <div className="animate-fade-in space-y-6">
       <h1 className="text-2xl font-bold tracking-tight text-gray-900">Profile & settings</h1>
+
+      {/* Your assessment */}
+      {scores ? (
+        <div className={`card sheen relative overflow-hidden ring-0 bg-gradient-to-br ${dominantCfg.hero} ${dominantCfg.heroFg} shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
+          <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
+            {dominantCfg.emoji}
+          </div>
+          <div className="relative flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-1`}>Your dominant energy</p>
+              <p className="text-2xl font-bold">{dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}</p>
+            </div>
+            <div className="flex gap-2">
+              <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
+                <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Level</p>
+                <p className="font-semibold tnums">{gamification.level}</p>
+              </div>
+              <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
+                <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Badges</p>
+                <p className="font-semibold tnums">{gamification.badges.length}</p>
+              </div>
+              {gamification.tier !== 'none' && (
+                <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
+                  <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Tier</p>
+                  <p className="font-semibold">{TIER_LABELS[gamification.tier] || gamification.tier}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="card text-center py-6">
+          <p className="text-gray-500 text-sm mb-3">Complete the questionnaire to see your profile here.</p>
+          <button onClick={() => onNavigate('quiz')} className="btn-primary bg-gray-900 hover:bg-gray-800 text-sm">
+            Take the Quiz
+          </button>
+        </div>
+      )}
 
       {/* Account */}
       <div className="card">
@@ -65,6 +149,49 @@ export default function Profile({ db, state, user, onUpdateState, onLogin, onLog
           </div>
         )}
       </div>
+
+      {/* Share */}
+      {user && (
+        <div className="card">
+          <h2 className="font-bold text-gray-900 mb-1">Share your profile</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Anyone with this link can view your results. No sign-in required. You can revoke it anytime,
+            and no one can search for or browse other people's profiles.
+          </p>
+          {shareToken ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <input
+                type="text"
+                readOnly
+                value={shareUrl}
+                onFocus={e => e.target.select()}
+                className="min-w-0 flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm bg-gray-50 text-gray-700"
+              />
+              <button onClick={handleCopyShare} className="btn-ghost ring-1 ring-gray-900/10 text-sm shrink-0">
+                {copied ? 'Copied ✓' : 'Copy'}
+              </button>
+              <button
+                onClick={handleRevokeShare}
+                disabled={shareLoading}
+                className="btn-ghost ring-1 ring-red-500/20 text-red-700 hover:bg-red-50 text-sm shrink-0 disabled:opacity-40"
+              >
+                Revoke
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleCreateShare}
+              disabled={shareLoading || !scores}
+              className="btn-primary bg-gray-900 hover:bg-gray-800 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {shareLoading ? 'Creating…' : 'Create link'}
+            </button>
+          )}
+          {!scores && !shareToken && (
+            <p className="text-xs text-gray-400 mt-2">Complete the questionnaire first to have a profile to share.</p>
+          )}
+        </div>
+      )}
 
       {/* Preferences */}
       <div className="card">

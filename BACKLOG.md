@@ -35,8 +35,13 @@ punted; remove it once it's done (check the commit/PR that closed it).
   OAuth `state`/PKCE flow. No rate limiting on auth or state endpoints.
 - **Additional OAuth providers** (GitHub, Microsoft, etc.) - the Arctic-based
   setup leaves room for this, not implemented.
-- **Team-mode data sharing between accounts** - stays local/opt-in per the
-  existing consent model; no server-side team sharing.
+- **Team-mode data sharing between accounts** - `TeamMode.jsx` is still
+  entirely local (one person manually retyping teammates' scores into their
+  own browser, nothing server-side, no real other accounts involved). The
+  Profile page's private share-link feature is the first *real* cross-account
+  sharing in the app, but it's individual-profile-only, not team aggregation
+  - see "Real team invites via email" below for what would actually replace
+  this.
 
 ## Product / UX
 
@@ -62,7 +67,18 @@ project.
 - **[L]** Real team invites via email - today's Team mode has people
   manually enter teammates' scores; a real invite-and-join flow (invite
   token, teammate signs in with their own Google account, auto-links into a
-  shared team) needs a new `teams` table and membership model.
+  shared team) needs a new `teams` table and membership model. Natural next
+  step after the private share-link feature (Profile page) if you want
+  actual team-scoped viewing/search rather than one-off private links -
+  evaluated and explicitly not built as an open, searchable directory of all
+  users, since that conflicts with the app's own "results stay on-device"
+  privacy default.
+- **[M]** Saved profile history (multiple snapshots over time). Today
+  there's exactly one saved profile per account, always current - retaking
+  the quiz overwrites it, no history. A "save a snapshot" action (e.g. "Q1
+  2026") plus a small history/comparison view would need a new
+  `profile_snapshots` table and isn't just a state-shape change like
+  preferences was.
 - **[S]** Self-service data export ("download everything you have on me" -
   a JSON dump of the `users` + `user_state` row). Natural pairing with
   account deletion (shipped in the Profile page).

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { colourConfig } from '../colours'
 
-function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
+export function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
   const pct = (score / 6) * 100
   return (
     <div className="mb-4 last:mb-0">
