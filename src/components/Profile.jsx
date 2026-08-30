@@ -102,6 +102,12 @@ export default function Profile({ db, state, user, onUpdateState, onLogin, onLog
               )}
             </div>
           </div>
+          <button
+            onClick={() => onNavigate('recap')}
+            className={`relative mt-4 text-xs font-medium ${dominantCfg.heroFgSoft} hover:opacity-80 transition-opacity underline underline-offset-2`}
+          >
+            View your journey →
+          </button>
         </div>
       ) : (
         <div className="card text-center py-6">

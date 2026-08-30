@@ -6,6 +6,8 @@ import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent,
 import Header from './components/Header'
 import Logo from './components/Logo'
 import Profile from './components/Profile'
+import Recap from './components/Recap'
+import { buildRecap, daysSince } from './recap'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
 import Results from './components/Results'
@@ -336,6 +338,19 @@ export default function App() {
             onDeleteAccount={handleDeleteAccount}
             onNavigate={navigate}
           />
+        )}
+        {state.view === 'recap' && state.scores && (
+          <div className="animate-fade-in space-y-4">
+            <button onClick={() => navigate('profile')} className="btn-ghost ring-1 ring-gray-900/10 text-sm">
+              ← Back to profile
+            </button>
+            <Recap recap={buildRecap({
+              scores: state.scores,
+              gamification: state.gamification,
+              db,
+              memberSinceDays: daysSince(user?.createdAt),
+            })} />
+          </div>
         )}
       </main>
 

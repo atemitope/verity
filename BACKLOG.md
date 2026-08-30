@@ -56,6 +56,22 @@ Recorded during the Profile page build once accounts had actual identities
 and email addresses attached. Sizing: S = hours, M = a day or two, L = a real
 project.
 
+**Market scan (2026-08), the two items below it directly draw on:**
+Gallup/CliftonStrengths keeps *multiple* saved results per account, lets you
+pick which is "current," and ships "Partnership Insights" comparing two
+specific people directly ([Gallup Help Center](https://support.gallup.com/hc/en-us/sections/48762948543635-CliftonStrengths)).
+Everything DiSC/Thomas DISC both ship a dedicated "Colleague Compare"/"Team
+View" for direct two-person comparison ([DiSC Comparison Reports](https://www.discprofile.com/fac-sup/disc-fac-tools/sample-reports/comparison)).
+Insights Discovery (this app's own named comparator) surfaces your profile
+inline inside Microsoft Teams during a chat/meeting ([Insights.com](https://www.insights.com/products/insights-discovery/))
+- validated, but a materially bigger infra lift (a Teams/Slack app, new
+OAuth scopes) than anything else here, not pursued yet. 16Personalities/
+Truity confirmed a market gap instead of a pattern to copy: paid report
+unlocks, no real 1:1 comparison feature - people just screenshot results.
+Spotify Wrapped / Duolingo Year in Review validate a different pattern -
+a personalized, shareable recap built from accumulated account history -
+which shipped as the Profile page's "Your Verity Journey" view.
+
 - **[M, needs infra]** Email re-engagement/reminders - e.g. turning the
   report's existing "14-Day Experiment" daily check-in prompts (already in
   `db.json`) into actual scheduled emails. Needs a transactional email
@@ -64,15 +80,34 @@ project.
 - **[S, needs infra]** Email yourself your report - reuses the existing
   `pdfExport.js`/JSON export logic server-side, sent via whatever provider
   gets picked for the item above.
-- **[L]** Real team invites via email - today's Team mode has people
-  manually enter teammates' scores; a real invite-and-join flow (invite
-  token, teammate signs in with their own Google account, auto-links into a
-  shared team) needs a new `teams` table and membership model. Natural next
-  step after the private share-link feature (Profile page) if you want
-  actual team-scoped viewing/search rather than one-off private links -
-  evaluated and explicitly not built as an open, searchable directory of all
-  users, since that conflicts with the app's own "results stay on-device"
-  privacy default.
+- **[L] "Compare with a colleague" - designed, ready to build next.** Fully
+  specced (not just sized) after a competitive scan turned up that DISC
+  ("Colleague Compare"/"Team View") and Gallup ("Partnership Insights") both
+  validate direct 1:1 comparison as a real, valued feature - and that
+  `TeamMode.jsx` already has decent pairing-analysis *copy*, just fed by
+  fake locally-entered data instead of a real second account.
+  - **Growth angle**: the invite should work on someone who's never used
+    Verity, not just two existing users - `App.jsx` picks up a `?compare=token`
+    param, stores it through anonymous quiz-taking, and claiming the
+    comparison (and therefore seeing it) requires signing in. That sign-in
+    gate is deliberate: it's the acquisition moment.
+  - **Model**: new `comparison_invites(token, inviter_user_id,
+    invitee_user_id NULL, created_at)` table - a two-sided claim, not a
+    one-sided broadcast like the existing view-only `profile_shares` link.
+    `GET /api/compare/:token` public for the first look (who invited you,
+    still open?); `POST /api/compare/:token/claim` (auth) locks it to the
+    second signer.
+  - **Tailored output, not templates**: `db.json`'s colour objects already
+    have `strengths`, `blind_spots`, `communication_cues`, and
+    `how_to_work_with` per colour - real, specific, already-written guidance
+    that `TeamMode.jsx` doesn't currently use (it only pulls a fragment of
+    `core_drive`, producing the same "Different paces and priorities" string
+    for every mismatched pair regardless of which colours are involved). A
+    new `src/compare.js` (`buildComparison(personA, personB, db)`) should
+    source synergy/friction/how-to-work-with from those fields instead,
+    genuinely tailored per pair.
+  - Explicitly not an open, searchable directory of all users - that would
+    conflict with the app's own "results stay on-device" privacy default.
 - **[M]** Saved profile history (multiple snapshots over time). Today
   there's exactly one saved profile per account, always current - retaking
   the quiz overwrites it, no history. A "save a snapshot" action (e.g. "Q1

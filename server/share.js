@@ -34,11 +34,14 @@ router.delete('/', requireAuth, async (req, res) => {
   res.status(204).end();
 });
 
-// Public — no auth. Only result data goes out here, never account/security
-// fields (no email, no user id, no session-relevant data).
+// Public — no auth. Only result + gamification data goes out here, never
+// account/security fields (no email, no user id, no session-relevant data,
+// no member-since date). Gamification is included so a shared "journey"
+// recap has real stats to show, not just scores.
 router.get('/:token/profile', async (req, res) => {
   const { rows } = await query(
-    `SELECT u.name, s.state->'scores' AS scores, s.state->'report' AS report
+    `SELECT u.name, s.state->'scores' AS scores, s.state->'report' AS report,
+            s.state->'gamification' AS gamification
      FROM profile_shares p
      JOIN users u ON u.id = p.user_id
      LEFT JOIN user_state s ON s.user_id = p.user_id
@@ -47,8 +50,8 @@ router.get('/:token/profile', async (req, res) => {
   );
   if (!rows.length || !rows[0].scores) return res.status(404).json({ error: 'not_found' });
 
-  const { name, scores, report } = rows[0];
-  res.json({ name, scores, report });
+  const { name, scores, report, gamification } = rows[0];
+  res.json({ name, scores, report, gamification });
 });
 
 export default router;

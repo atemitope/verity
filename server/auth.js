@@ -85,13 +85,13 @@ router.get('/me', async (req, res) => {
   if (!userId) return res.status(401).json({ user: null });
 
   const { rows } = await query(
-    'SELECT id, email, name, avatar_url FROM users WHERE id = $1',
+    'SELECT id, email, name, avatar_url, created_at FROM users WHERE id = $1',
     [userId],
   );
   if (rows.length === 0) return res.status(401).json({ user: null });
 
   const u = rows[0];
-  res.json({ user: { id: u.id, email: u.email, name: u.name, avatarUrl: u.avatar_url } });
+  res.json({ user: { id: u.id, email: u.email, name: u.name, avatarUrl: u.avatar_url, createdAt: u.created_at } });
 });
 
 router.post('/logout', (req, res) => {

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { colourConfig } from '../colours'
 import { fetchSharedProfile } from '../share'
+import { buildRecap } from '../recap'
 import { SpectrumBar } from './Results'
+import Recap from './Recap'
 import Logo from './Logo'
 
 // Standalone, read-only page for a private share link (/share/:token).
@@ -10,6 +12,7 @@ import Logo from './Logo'
 export default function SharedProfile({ token }) {
   const [db, setDb] = useState(null)
   const [profile, setProfile] = useState(undefined) // undefined = loading, null = not found
+  const [view, setView] = useState('full') // 'full' | 'journey'
 
   useEffect(() => {
     Promise.all([
@@ -55,42 +58,66 @@ export default function SharedProfile({ token }) {
           <span className="text-sm font-semibold">Verity</span>
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">{name ? `${name}'s` : "Someone's"} colour spectrum profile</p>
-
-        {/* Hero */}
-        <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${dominantCfg.hero} ${dominantCfg.heroFg} shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
-          <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
-            {dominantCfg.emoji}
+        <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+          <p className="text-sm text-gray-500">{name ? `${name}'s` : "Someone's"} colour spectrum profile</p>
+          <div className="inline-flex rounded-lg bg-gray-100 p-0.5 text-xs font-medium">
+            <button
+              onClick={() => setView('full')}
+              className={`px-3 py-1.5 rounded-md transition-colors ${view === 'full' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+            >
+              Full profile
+            </button>
+            <button
+              onClick={() => setView('journey')}
+              className={`px-3 py-1.5 rounded-md transition-colors ${view === 'journey' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+            >
+              Journey
+            </button>
           </div>
-          <div className="text-center py-4 relative">
-            <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2`}>Dominant energy</p>
-            <h1 className="text-4xl sm:text-5xl font-bold mb-2 tracking-tight">
-              {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
-            </h1>
-            <p className={`${dominantCfg.heroFgSoft} text-sm mb-4 max-w-md mx-auto leading-relaxed`}>
-              {db.colours[scores.dominantColour].core_drive}
-            </p>
-            <div className={`inline-block ${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-2`}>
-              <p className={`${dominantCfg.heroFgSoft} text-xs mb-0.5`}>Secondary</p>
-              <p className="font-semibold">{secondaryCfg.emoji} {db.colours[scores.secondaryColour].display_name}</p>
+        </div>
+
+        {view === 'journey' ? (
+          <div className="mb-6">
+            <Recap recap={buildRecap({ scores, gamification: profile.gamification, db })} />
+          </div>
+        ) : (
+          <>
+            {/* Hero */}
+            <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${dominantCfg.hero} ${dominantCfg.heroFg} shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
+              <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
+                {dominantCfg.emoji}
+              </div>
+              <div className="text-center py-4 relative">
+                <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2`}>Dominant energy</p>
+                <h1 className="text-4xl sm:text-5xl font-bold mb-2 tracking-tight">
+                  {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
+                </h1>
+                <p className={`${dominantCfg.heroFgSoft} text-sm mb-4 max-w-md mx-auto leading-relaxed`}>
+                  {db.colours[scores.dominantColour].core_drive}
+                </p>
+                <div className={`inline-block ${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-2`}>
+                  <p className={`${dominantCfg.heroFgSoft} text-xs mb-0.5`}>Secondary</p>
+                  <p className="font-semibold">{secondaryCfg.emoji} {db.colours[scores.secondaryColour].display_name}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Spectrum scores */}
-        <div className="card mb-6">
-          <h2 className="font-bold text-gray-900 text-lg mb-4">Spectrum Scores</h2>
-          {sorted.map((colourKey, i) => (
-            <SpectrumBar
-              key={colourKey}
-              colour={colourKey}
-              rank={i}
-              score={scores.spectrumScores[colourKey]}
-              cfg={colourConfig(colourKey)}
-              label={db.colours[colourKey].display_name}
-            />
-          ))}
-        </div>
+            {/* Spectrum scores */}
+            <div className="card mb-6">
+              <h2 className="font-bold text-gray-900 text-lg mb-4">Spectrum Scores</h2>
+              {sorted.map((colourKey, i) => (
+                <SpectrumBar
+                  key={colourKey}
+                  colour={colourKey}
+                  rank={i}
+                  score={scores.spectrumScores[colourKey]}
+                  cfg={colourConfig(colourKey)}
+                  label={db.colours[colourKey].display_name}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         <footer className="border-t border-gray-200/70 pt-6 text-center text-xs leading-relaxed text-gray-500 max-w-2xl mx-auto">
           Verity is a behavioural preference tool for self-awareness and development.
