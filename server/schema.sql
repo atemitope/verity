@@ -16,3 +16,12 @@ CREATE TABLE IF NOT EXISTS user_state (
   state       JSONB NOT NULL,
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Private, revocable link to a user's own results. One row per user; the
+-- token is the sole access control (no directory, no lookup by anything
+-- else). Deleting the row (or cascading from a deleted account) revokes it.
+CREATE TABLE IF NOT EXISTS profile_shares (
+  token       TEXT PRIMARY KEY,
+  user_id     INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

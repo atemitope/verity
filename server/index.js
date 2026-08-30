@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { ensureSchema } from './db.js';
 import authRoutes from './auth.js';
 import stateRoutes from './state.js';
+import shareRoutes from './share.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProd = process.env.NODE_ENV === 'production';
@@ -33,6 +34,7 @@ if (!isProd) {
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/state', stateRoutes);
+app.use('/api/share', shareRoutes);
 
 // In production the backend also serves the built SPA.
 if (isProd) {

@@ -127,10 +127,27 @@
   display: none;
 }
 
+/*
+ * Reduced motion: honors the OS setting by default, but a user can override
+ * it explicitly via the Profile preferences (data-motion on <html>).
+ * A media query can't be conditionally disabled by a class, so the OS-driven
+ * block below is guarded with :not([data-motion="full"]) so an explicit
+ * "Full" choice can suppress it; the explicit "Reduced" block is separate
+ * and unconditional, and must come after the media block so it always wins.
+ */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  :root:not([data-motion="full"]) *,
+  :root:not([data-motion="full"]) *::before,
+  :root:not([data-motion="full"]) *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+[data-motion="reduced"] *,
+[data-motion="reduced"] *::before,
+[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
 }

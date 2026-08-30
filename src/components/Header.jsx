@@ -94,14 +94,22 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
               </span>
             )}
 
-            {/* Auth control */}
+            {/* Profile entry point — same destination in both auth states, so
+                preferences stay reachable without signing in. Sign out lives
+                on the Profile page now, not here. */}
             {user ? (
-              <div className="flex items-center gap-2">
+              <button
+                onClick={() => onNavigate('profile')}
+                aria-label="Open profile and settings"
+                className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-lg text-xs font-medium text-gray-700
+                  transition-colors duration-150 hover:bg-gray-100
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+              >
                 {user.avatarUrl ? (
                   <img
                     src={user.avatarUrl}
                     alt=""
-                    className="w-6 h-6 rounded-full border border-gray-200"
+                    className="w-6 h-6 rounded-full ring-1 ring-gray-900/10"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
@@ -109,21 +117,28 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
                     {(user.name || user.email || '?').charAt(0).toUpperCase()}
                   </span>
                 )}
+                <span className="hidden xs:inline max-w-[7rem] truncate">
+                  {(user.name || user.email || '').split(/[\s@]/)[0]}
+                </span>
+                <span aria-hidden="true" className="text-gray-400 text-[10px]">▾</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5">
                 <button
-                  onClick={onLogout}
-                  className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
-                  title={user.email || user.name || 'Signed in'}
+                  onClick={() => onNavigate('profile')}
+                  aria-label="Settings"
+                  className="text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 rounded-lg transition-colors
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
                 >
-                  Sign out
+                  ⚙<span className="hidden xs:inline ml-1">Settings</span>
+                </button>
+                <button
+                  onClick={onLogin}
+                  className="text-xs font-medium bg-gray-900 text-white px-3 py-1 rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  Sign in
                 </button>
               </div>
-            ) : (
-              <button
-                onClick={onLogin}
-                className="text-xs font-medium bg-gray-900 text-white px-3 py-1 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                Sign in
-              </button>
             )}
           </div>
         </div>

@@ -30,6 +30,16 @@ export async function logout() {
   }
 }
 
+/** Permanently delete the signed-in user's account and all data. Returns true on success. */
+export async function deleteAccount() {
+  try {
+    const res = await fetch('/api/auth/me', { method: 'DELETE', ...opts });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 /** Fetch the signed-in user's server-saved state, or null if none/unauth. */
 export async function getServerState() {
   try {

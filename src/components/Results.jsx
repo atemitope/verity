@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { colourConfig } from '../colours'
 
-function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
+export function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
   const pct = (score / 6) * 100
   return (
     <div className="mb-4 last:mb-0">
@@ -29,7 +29,7 @@ function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
 
 export default function Results({ db, state, onViewReport, onNavigate }) {
   const { scores } = state
-  const [showExplainer, setShowExplainer] = useState(false)
+  const [showExplainer, setShowExplainer] = useState(!!state.preferences?.explainerDefaultOpen)
 
   const colours = db.scoring.colour_keys
   const sorted = scores.sortedColours
