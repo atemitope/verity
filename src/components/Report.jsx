@@ -71,6 +71,22 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
         </button>
       </div>
 
+      {/* "Purpose and how to use this report" — spec'd in db.json's
+          report_templates section list but never built. Orientation for
+          someone who has just met this report for the first time. */}
+      <div className="card mb-6">
+        <Section title="How to use this report" icon="🧭">
+          <p className="text-gray-700 leading-relaxed">
+            {db.report_templates.individual_report_v1.purpose}
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed mt-3">
+            Each section answers a question about how you tend to work. Nothing here is a verdict —
+            these are patterns you'll recognise more in some situations than others. The scoring
+            behind them is in the appendix at the end.
+          </p>
+        </Section>
+      </div>
+
       <div className="card mb-6">
         <Section title="Profile Summary" icon="🎯">
           <p className="text-gray-700 leading-relaxed">{report.profileSummary}</p>
@@ -87,52 +103,28 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
         </Section>
       </div>
 
-      <div className="card mb-6">
-        <Section title="Spectrum Scores & Explainability" icon="📊">
-          {db.scoring.colour_keys.map(c => {
-            const cfg = colourConfig(c)
-            const score = scores.spectrumScores[c]
-            return (
-              <div key={c} className="mb-3 last:mb-0">
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="font-medium">{cfg.emoji} {db.colours[c].display_name}</span>
-                  <span className="text-gray-500 tnums">
-                    {scores.rawPoints[c].toFixed(0)} / {scores.maxPoints[c].toFixed(0)} pts → <strong className="text-gray-700">{score.toFixed(2)}/6</strong>
-                  </span>
-                </div>
-                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden ring-1 ring-gray-900/[0.04]">
-                  <div className={`h-full bg-gradient-to-r ${cfg.gradient} rounded-full spectrum-fill`} style={{ width: `${(score / 6) * 100}%` }} />
-                </div>
-              </div>
-            )
-          })}
-          <p className="text-xs text-gray-500 mt-3 tnums">
-            Confidence: {scores.confidence}% · Balance index: {scores.balanceIndex.toFixed(2)} · Top gap: {scores.topGap.toFixed(2)}
-          </p>
-        </Section>
-      </div>
 
       <div className="card mb-6">
-        <Section title="Strengths" icon="💪">
+        <Section title="What you're great at" icon="💪">
           <BulletList items={report.strengths} cfg={domCfg} />
           <p className="text-xs text-gray-500 mt-2">3 from {domColour.display_name}, 2 from {secColour.display_name}</p>
         </Section>
       </div>
 
       <div className="card mb-6">
-        <Section title="Possible Challenges" icon="⚠️">
+        <Section title="What to watch for" icon="👀">
           <BulletList items={report.challenges} cfg={{ bgLight: 'bg-gray-50', text: 'text-gray-500' }} />
         </Section>
       </div>
 
       <div className="card mb-6">
-        <Section title="Communication Tips" icon="💬">
+        <Section title="How you communicate" icon="💬">
           <BulletList items={report.commTips} cfg={secCfg} />
         </Section>
       </div>
 
       <div className="card mb-6">
-        <Section title="Under Pressure" icon="🌡️">
+        <Section title="How you are under pressure" icon="🌡️">
           <div className={`p-4 rounded-xl ${domCfg.bgLight} mb-3`}>
             <p className="text-sm text-gray-700 font-medium mb-1">Stress pattern:</p>
             <p className="text-sm text-gray-600 leading-relaxed">{report.underPressure.pattern}</p>
@@ -145,13 +137,13 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
       </div>
 
       <div className="card mb-6">
-        <Section title="How to Work With You" icon="🤝">
+        <Section title="How others should work with you" icon="🤝">
           <BulletList items={report.howToWorkWith} cfg={domCfg} />
         </Section>
       </div>
 
       <div className="card mb-6">
-        <Section title="Next Steps" icon="🎯">
+        <Section title="What to try next" icon="🎯">
           <div className="space-y-3">
             {report.nextSteps.map((step, i) => {
               const cfg = colourConfig(step.colour)
@@ -180,6 +172,34 @@ export default function Report({ db, state, onExport, onExportPdf, onNavigate })
               ))}
             </div>
           </div>
+        </Section>
+      </div>
+
+      {/* Spec section 11, "Appendix: scoring transparency and exports".
+          Moved out of position 3 so the narrative is not interrupted by
+          maths — every number is still here, in full. */}
+      <div className="card mb-6">
+        <Section title="Appendix: scoring transparency" icon="📊">
+          {db.scoring.colour_keys.map(c => {
+            const cfg = colourConfig(c)
+            const score = scores.spectrumScores[c]
+            return (
+              <div key={c} className="mb-3 last:mb-0">
+                <div className="flex justify-between text-sm mb-1.5">
+                  <span className="font-medium">{cfg.emoji} {db.colours[c].display_name}</span>
+                  <span className="text-gray-500 tnums">
+                    {scores.rawPoints[c].toFixed(0)} / {scores.maxPoints[c].toFixed(0)} pts → <strong className="text-gray-700">{score.toFixed(2)}/6</strong>
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden ring-1 ring-gray-900/[0.04]">
+                  <div className={`h-full bg-gradient-to-r ${cfg.gradient} rounded-full spectrum-fill`} style={{ width: `${(score / 6) * 100}%` }} />
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-xs text-gray-500 mt-3 tnums">
+            Confidence: {scores.confidence}% · Balance index: {scores.balanceIndex.toFixed(2)} · Top gap: {scores.topGap.toFixed(2)}
+          </p>
         </Section>
       </div>
 

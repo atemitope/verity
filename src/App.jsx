@@ -6,6 +6,7 @@ import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent,
 import Header from './components/Header'
 import Logo from './components/Logo'
 import Profile from './components/Profile'
+import Settings from './components/Settings'
 import Recap from './components/Recap'
 import { buildRecap, daysSince } from './recap'
 import Home from './components/Home'
@@ -329,6 +330,14 @@ export default function App() {
         {state.view === 'profile' && (
           <Profile
             db={db}
+            state={state}
+            user={user}
+            onLogin={handleLogin}
+            onNavigate={navigate}
+          />
+        )}
+        {state.view === 'settings' && (
+          <Settings
             state={state}
             user={user}
             onUpdateState={updateState}

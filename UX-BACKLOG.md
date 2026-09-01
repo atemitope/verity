@@ -1,9 +1,10 @@
 # UX backlog: from colour-first to behaviour-first
 
-> **Status.** P0.1, P0.2, P0.3, P1.1 and P1.2 are shipped — see
-> `src/interpret.js` and its tests. P2–P4 remain open. One item was upgraded
-> during implementation: P0.3 turned out to be a **correctness bug**, not just
-> a copy fix (details in that section).
+> **Status.** Shipped: P0.1, P0.2, P0.3, P1.1, P1.2, P3.2, P4.1, and P4.3 in
+> part. Open: P2.2, P3.1 in part, P4.2. Two items changed shape once the code
+> was opened — P0.3 turned out to be a **correctness bug** rather than a copy
+> fix, and P4.1 revealed that "Profile" was being used for two different
+> things (see those sections).
 
 A user-centered review of Verity, written for the everyday visitor rather than
 someone who already knows how the app works. Separate from `BACKLOG.md` (which
@@ -231,7 +232,16 @@ preserved - it's just no longer the second thing you read about yourself.
 
 ## P4 - The structural change
 
-### P4.1 Organise around life questions, not report sections · **L**
+### P4.1 Organise around life questions, not report sections · **L** · ✅ shipped
+
+> **Shipped in two places, and it surfaced a naming collision.** "Profile" in
+> the nav meant *account settings* — while the user's complaint was about
+> finding their *behavioural* profile. Those are now separate: **Profile** is
+> the behavioural profile, browsable by question via `src/domains.js`; account
+> and app settings moved to **Settings**, reached from the header chip that
+> already existed. The Report keeps its `db.json`-spec'd section list but is
+> now phrased as questions, and the PDF was realigned so screen and export
+> don't drift.
 **Problem.** This is the deepest version of the original critique. Content is
 currently structured the way the *report* is built, not the way a person
 *thinks*. Someone wondering "how do I come across in meetings?" or "why do I
@@ -268,7 +278,7 @@ warns to "watch for interpersonal friction in low-energy areas" - that's a
 genuinely useful thing to tell someone about their lowest colour, and it's
 sitting unused.
 
-### P4.3 System vocabulary in user-facing copy · **S**
+### P4.3 System vocabulary in user-facing copy · **S** · ◑ partly shipped
 **Problem.** "Spectrum Scores", "Explainability Panel", "Derived Metrics",
 "Forced alignment", "Balance index", "Top gap", "Polarity" are all internal
 engineering terms shown directly to users.

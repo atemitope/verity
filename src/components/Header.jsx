@@ -49,7 +49,11 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
 
   // Views reachable without a nav entry, so the mobile trigger still names
   // the page you're actually on.
-  const OFF_NAV_LABELS = { report: { label: 'Full report', icon: '📄' } }
+  const OFF_NAV_LABELS = {
+    report: { label: 'Full report', icon: '📄' },
+    settings: { label: 'Settings', icon: '⚙️' },
+    recap: { label: 'Your journey', icon: '✨' },
+  }
   const activeItem =
     NAV_ITEMS.find((i) => i.key === state.view) ||
     OFF_NAV_LABELS[state.view] ||
@@ -107,13 +111,14 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
               </span>
             )}
 
-            {/* Profile entry point — same destination in both auth states, so
-                preferences stay reachable without signing in. Sign out lives
-                on the Profile page now, not here. */}
+            {/* Account/settings entry point — same destination in both auth
+                states, so preferences stay reachable without signing in. The
+                behavioural profile is a separate nav destination; sign out
+                lives in Settings. */}
             {user ? (
               <button
-                onClick={() => onNavigate('profile')}
-                aria-label="Open profile and settings"
+                onClick={() => onNavigate('settings')}
+                aria-label="Account and settings"
                 className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-lg text-xs font-medium text-gray-700
                   transition-colors duration-150 hover:bg-gray-100
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
@@ -138,7 +143,7 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
             ) : (
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => onNavigate('profile')}
+                  onClick={() => onNavigate('settings')}
                   aria-label="Settings"
                   className="text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 rounded-lg transition-colors
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
