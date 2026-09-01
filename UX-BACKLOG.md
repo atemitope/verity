@@ -1,5 +1,10 @@
 # UX backlog: from colour-first to behaviour-first
 
+> **Status.** P0.1, P0.2, P0.3, P1.1 and P1.2 are shipped — see
+> `src/interpret.js` and its tests. P2–P4 remain open. One item was upgraded
+> during implementation: P0.3 turned out to be a **correctness bug**, not just
+> a copy fix (details in that section).
+
 A user-centered review of Verity, written for the everyday visitor rather than
 someone who already knows how the app works. Separate from `BACKLOG.md` (which
 tracks deferred technical work) because this is a product-direction document:
@@ -99,7 +104,7 @@ already set for itself.
 
 ## P0 - The payoff moment
 
-### P0.1 Lead Results with behaviour, not colour and scores · **M**
+### P0.1 Lead Results with behaviour, not colour and scores · **M** · ✅ shipped
 **Problem.** The first thing a user sees after investing 32 questions is a
 label and four decimals. Nothing tells them what they're *like*.
 
@@ -112,7 +117,7 @@ pattern**, sitting alongside it rather than above it. Scores move below the
 behaviour. The explainability panel stays exactly where it is (already
 collapsed) and keeps every number.
 
-### P0.2 Show what the numbers mean - the text is already in `db.json` · **S**
+### P0.2 Show what the numbers mean - the text is already in `db.json` · **S** · ✅ shipped
 **Problem.** The page prints `Red–Green polarity 0.100` and `Blue–Yellow
 polarity 0.200`. Meaningless to a normal person.
 
@@ -128,8 +133,18 @@ ever reached a user. `src/components/Results.jsx:129-130` prints only
 end labels. Identical data, now legible, and it satisfies the rubric's
 "how they map to text" requirement with content that already exists.
 
-### P0.3 Balance Profile text is hardcoded, and the `db.json` version is better · **S**
-**Problem.** `src/components/Results.jsx:167-170` hardcodes three strings for
+### P0.3 Balance Profile was misclassifying profiles · **S** · ✅ shipped
+
+> **Upgraded during implementation.** This was filed as a copy fix. It was a
+> correctness bug. `balanceIndex = 1 - range/6`, so the shipped thresholds
+> (`0.8` / `0.5`) put the band boundaries at range 1.2 and 3.0 — but
+> `db.json` specifies 1 and 2.5. A profile with range 2.7 was told
+> *"Moderately differentiated"* when the spec classifies it as `high`, whose
+> guidance is materially different advice: *"Watch for interpersonal friction
+> in low-energy areas."* Now classified by `describeBalance()` against the
+> db thresholds, with a regression test pinning the 2.7 case.
+
+**Problem.** `src/components/Results.jsx:167-170` hardcoded three strings for
 the Balance Profile ("Flat profile — your energies are broadly balanced…").
 
 **Evidence.** This breaks the "never hardcode content" constraint, and
@@ -145,7 +160,7 @@ improves the copy at the same time.
 
 ## P1 - Finding your profile
 
-### P1.1 There is no "my profile" in the navigation · **M**
+### P1.1 There is no "my profile" in the navigation · **M** · ✅ shipped
 **Problem.** The nav is `Home · Quiz · Results · Report · Challenges ·
 Achievements · Team`. The Profile page isn't in it at all - it's reachable only
 through a small avatar/Settings chip in the header corner. A user thinking
@@ -158,7 +173,7 @@ internal distinction (scores vs. narrative) that shouldn't be exposed as two
 peer destinations - either merge them or make one clearly a section of the
 other.
 
-### P1.2 A first-time visitor's nav is mostly padlocks · **S**
+### P1.2 A first-time visitor's nav is mostly padlocks · **S** · ✅ shipped
 **Problem.** Before completing the assessment, four of seven nav items render
 greyed out with 🔒. The first structural message is "most of this is denied to
 you," before the app has said what any of it is.
