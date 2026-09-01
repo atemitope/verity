@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { colourConfig } from '../colours'
-import { buildDomains } from '../domains'
+import { buildDomains, buildLowEnergy } from '../domains'
 import { getShareStatus, createShareLink, revokeShareLink } from '../share'
 import DomainSections from './DomainSections'
 
@@ -73,6 +73,7 @@ export default function Profile({ db, state, user, onLogin, onNavigate }) {
 
   const dominantCfg = colourConfig(scores.dominantColour)
   const domains = buildDomains(scores, db)
+  const lowEnergy = buildLowEnergy(scores, db)
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -124,6 +125,63 @@ export default function Profile({ db, state, user, onLogin, onNavigate }) {
 
       {/* The behavioural domains — the substance of the profile. */}
       <DomainSections domains={domains} idPrefix="profile" />
+
+      {/* A low score meant nothing on its own. The useful reading isn't
+          "you're bad at this" — it's "this is where you're least like other
+          people", which is what interpretation_rules warns friction comes from. */}
+      {lowEnergy && (
+        <section className="card">
+          <h2 className="font-bold text-gray-900 text-lg tracking-tight flex items-center gap-2.5">
+            <span aria-hidden="true" className="grid place-items-center w-9 h-9 rounded-xl bg-gray-100 text-base leading-none shrink-0">
+              🧲
+            </span>
+            Where you'll feel friction
+          </h2>
+          <p className="text-sm text-gray-500 mt-1.5 mb-4">
+            Your least-used energy is{' '}
+            <span className={`font-medium ${lowEnergy.cfg.text}`}>
+              {lowEnergy.cfg.emoji} {lowEnergy.colourName}
+            </span>
+            {typeof lowEnergy.score === 'number' && (
+              <span className="tnums"> ({lowEnergy.score.toFixed(2)}/6)</span>
+            )}
+            . That isn't a weakness — it's where your instincts differ most from
+            people who lead with it.
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                People who lead with it tend to
+              </p>
+              <ul className="space-y-2">
+                {lowEnergy.theirBehaviours.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span aria-hidden="true" className={`${lowEnergy.cfg.text} mt-0.5 shrink-0 text-xs`}>▸</span>
+                    <span className="text-sm text-gray-600 leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                Working well with them
+              </p>
+              <ul className="space-y-2">
+                {lowEnergy.workingWithThem.map((item, i) => (
+                  <li
+                    key={i}
+                    className={`flex items-start gap-2.5 p-3 rounded-xl ${lowEnergy.cfg.bgLight} ring-1 ring-gray-900/[0.03]`}
+                  >
+                    <span aria-hidden="true" className={`${lowEnergy.cfg.text} mt-0.5 shrink-0`}>▸</span>
+                    <span className="text-sm text-gray-700 leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Sharing this profile */}
       {user && (

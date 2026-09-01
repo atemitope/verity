@@ -1,10 +1,12 @@
 # UX backlog: from colour-first to behaviour-first
 
-> **Status.** Shipped: P0.1, P0.2, P0.3, P1.1, P1.2, P3.2, P4.1, and P4.3 in
-> part. Open: P2.2, P3.1 in part, P4.2. Two items changed shape once the code
-> was opened — P0.3 turned out to be a **correctness bug** rather than a copy
-> fix, and P4.1 revealed that "Profile" was being used for two different
-> things (see those sections).
+> **Status.** Shipped: P0.1, P0.2, P0.3, P1.1, P1.2, P2.1, P2.2, P3.2, P4.1,
+> P4.2, and P4.3 in part. Still open: P3.1 in part — the Report's sections are
+> now question-phrased but still render as visually uniform cards.
+>
+> Two items changed shape once the code was opened: P0.3 turned out to be a
+> **correctness bug** rather than a copy fix, and P4.1 surfaced that "Profile"
+> was being used for two different things (see those sections).
 
 A user-centered review of Verity, written for the everyday visitor rather than
 someone who already knows how the app works. Separate from `BACKLOG.md` (which
@@ -186,7 +188,7 @@ them as a visible preview of what's coming.
 
 ## P2 - Colour as label, not as content
 
-### P2.1 Colour names are undecodable on first contact · **S**
+### P2.1 Colour names are undecodable on first contact · **S** · ✅ shipped
 **Problem.** "Sunshine Yellow" carries no meaning for a newcomer. The homepage
 lists four colour names each followed by a comma-separated keyword dump
 (*"connection, possibility, optimism, influence, variety"*), which reads as
@@ -196,7 +198,7 @@ tags rather than a description of a person.
 sentence next to it. On the homepage energy cards, lead with the behaviour and
 let the colour be the tag.
 
-### P2.2 Invert the hierarchy everywhere colour currently headlines · **M**
+### P2.2 Invert the hierarchy everywhere colour currently headlines · **M** · ✅ shipped
 **Problem.** The Results hero, the Report cover, the PDF cover, the share page,
 and the Journey recap all headline the **colour name**. That's the core
 critique: the label is being presented as the insight.
@@ -210,7 +212,7 @@ which is often a stranger's first ever exposure to Verity.
 
 ## P3 - Making the report readable
 
-### P3.1 Nine near-identical bullet-list cards · **M**
+### P3.1 Nine near-identical bullet-list cards · **M** · ◑ partly shipped
 **Problem.** Profile Summary, Strengths, Possible Challenges, Communication
 Tips, Under Pressure, How to Work With You, Next Steps, and the 14-Day
 Experiment are rendered as visually interchangeable card + bullet blocks. There
@@ -269,7 +271,14 @@ This is what turns Verity from "a test that outputs a colour" into "a profile
 of how you work." Everything in P0–P3 moves toward it; this is the item that
 makes the reframe structural rather than cosmetic.
 
-### P4.2 A low score is never explained · **S**
+### P4.2 A low score is never explained · **S** · ✅ shipped
+
+> Shipped as "Where you'll feel friction" on the Profile. The useful reading of
+> a low score isn't "you're bad at this" — it's where your instincts differ most
+> from other people, which is exactly the friction `interpretation_rules` warns
+> about. Shows what people who lead with that energy tend to do, and its own
+> `how_to_work_with` as guidance for working with them. Returns nothing at all
+> for a flat profile, rather than inventing a weak spot from noise.
 **Problem.** `Fiery Red 1.44 / 6` - is that a problem? A neutral fact?
 Something to work on? The app never says.
 

@@ -20,12 +20,19 @@ const DISCOVER = [
 function EnergyRow({ colourKey, db, first }) {
   const colour = db.colours[colourKey]
   const cfg = colourConfig(colourKey)
+  // Lead with a recognisable behaviour. "Cool Blue" means nothing to someone
+  // meeting Verity for the first time, so the colour is the tag, not the point.
+  const behaviour = (colour.typical_behaviours || [])[0]
   return (
     <div className="flex items-stretch">
       <span aria-hidden="true" className="w-2 shrink-0" style={{ backgroundColor: cfg.hex }} />
       <div className={`min-w-0 flex-1 p-4 ${first ? '' : 'border-t border-gray-100'}`}>
-        <h3 className={`text-sm font-semibold ${cfg.textDark}`}>{colour.display_name}</h3>
-        <p className="mt-0.5 text-xs leading-relaxed text-gray-600">{colour.core_drive}</p>
+        <p className="text-sm font-medium leading-snug text-gray-800">
+          {behaviour || colour.core_drive}
+        </p>
+        <p className={`mt-1.5 text-xs font-semibold ${cfg.textDark}`}>
+          {cfg.emoji} {colour.display_name}
+        </p>
       </div>
     </div>
   )

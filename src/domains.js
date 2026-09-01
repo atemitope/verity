@@ -74,6 +74,42 @@ function toItems(value) {
 }
 
 /**
+ * Describe a person's least-used energy.
+ *
+ * A low score was previously shown as a bare number with no interpretation —
+ * is 1.44/6 a problem, or just a fact? db.json's interpretation_rules warn to
+ * "watch for interpersonal friction in low-energy areas", and the lowest
+ * colour's own `how_to_work_with` is precisely the guidance for working with
+ * people who lead with it. That's the useful reading of a low score: not a
+ * deficit, but where you're least like other people.
+ */
+export function buildLowEnergy(scores, db) {
+  const sorted = scores?.sortedColours
+  if (!sorted?.length) return null
+
+  const colourKey = sorted[sorted.length - 1]
+  const colour = db.colours[colourKey]
+  if (!colour) return null
+
+  // If everything is level there is no meaningful "least-used" energy.
+  const lowScore = scores.spectrumScores?.[colourKey]
+  const topScore = scores.spectrumScores?.[sorted[0]]
+  if (typeof lowScore === 'number' && typeof topScore === 'number' && topScore - lowScore < 0.5) {
+    return null
+  }
+
+  return {
+    colourKey,
+    colourName: colour.display_name,
+    cfg: colourConfig(colourKey),
+    coreDrive: colour.core_drive,
+    score: lowScore ?? null,
+    theirBehaviours: toItems(colour.typical_behaviours),
+    workingWithThem: toItems(colour.how_to_work_with),
+  }
+}
+
+/**
  * Build every domain for a person, blending dominant and secondary energies
  * the way the rest of the app does (dominant leads, secondary supports).
  *

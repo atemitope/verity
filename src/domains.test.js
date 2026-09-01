@@ -3,7 +3,7 @@
  * Usage: node src/domains.test.js
  */
 import { readFileSync } from 'fs'
-import { DOMAINS, buildDomains } from './domains.js'
+import { DOMAINS, buildDomains, buildLowEnergy } from './domains.js'
 
 const db = JSON.parse(readFileSync('./public/db.json', 'utf8'))
 
@@ -78,6 +78,43 @@ console.log('\n--- edge cases ---')
     }
   }
   assert('every dominant/secondary pairing produces a full set', allOk)
+}
+
+console.log('\n--- buildLowEnergy: what a low score actually means ---')
+{
+  const differentiated = {
+    sortedColours: ['cool_blue', 'sunshine_yellow', 'fiery_red', 'earth_green'],
+    spectrumScores: { cool_blue: 5.0, sunshine_yellow: 3.2, fiery_red: 2.1, earth_green: 1.4 },
+  }
+  const low = buildLowEnergy(differentiated, db)
+  assert('picks the last colour in sortedColours', low.colourKey === 'earth_green')
+  assert('resolves its display name', low.colourName === 'Earth Green')
+  assert('carries its score', low.score === 1.4)
+  assert('explains what people who lead with it do', low.theirBehaviours.length > 0)
+  assert('explains how to work with them', low.workingWithThem.length > 0)
+  assert('that guidance is the low colour\'s own how_to_work_with',
+    low.workingWithThem.every(i => toArr(db.colours.earth_green.how_to_work_with).includes(i)))
+
+  // A flat profile has no meaningful "least-used" energy — claiming one would
+  // over-read noise, which interpretation_rules explicitly warns against.
+  const flat = {
+    sortedColours: ['cool_blue', 'sunshine_yellow', 'fiery_red', 'earth_green'],
+    spectrumScores: { cool_blue: 3.2, sunshine_yellow: 3.1, fiery_red: 3.0, earth_green: 2.9 },
+  }
+  assert('a flat profile returns null rather than inventing a weak spot', buildLowEnergy(flat, db) === null)
+
+  assert('no scores returns null', buildLowEnergy(null, db) === null)
+  assert('missing sortedColours returns null', buildLowEnergy({}, db) === null)
+
+  // Works whichever colour lands lowest.
+  assert('resolves for every colour as the lowest', db.scoring.colour_keys.every(c => {
+    const others = db.scoring.colour_keys.filter(k => k !== c)
+    const s = {
+      sortedColours: [...others, c],
+      spectrumScores: Object.fromEntries([...others.map(k => [k, 5]), [c, 1]]),
+    }
+    return buildLowEnergy(s, db)?.colourKey === c
+  }))
 }
 
 function toArr(v) { return Array.isArray(v) ? v : [v] }
