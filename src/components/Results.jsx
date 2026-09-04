@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
 import { colourConfig } from '../colours'
 import { describeBalance, describePolarity } from '../interpret'
+import { buildSituations, buildRelational, buildOppositeType } from '../situations'
+import { buildLowEnergy } from '../domains'
+import SituationSections, { SituationJumpLinks } from './SituationSections'
+import FrictionSection from './FrictionSection'
+import ReflectionPrompts from './ReflectionPrompts'
+import NextActions from './NextActions'
 
 export function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
   const pct = (score / 6) * 100
@@ -28,7 +34,21 @@ export function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
   )
 }
 
-export default function Results({ db, state, onViewReport, onNavigate }) {
+/**
+ * Results is the report card.
+ *
+ * It used to be a summary: three behaviours, a colour, four score bars, and
+ * two buttons asking for a click without showing what was behind them. That's
+ * a thin return on 32 questions, and the substance — how you show up under
+ * pressure, where friction comes from, what to actually do — was scattered
+ * across Profile and Report where nobody knew to look for it.
+ *
+ * The order is deliberate: recognise yourself, understand the situations,
+ * see where the friction is, write down what rings true, then act. Numbers
+ * come last. "3.82 / 6" is evidence, not an insight, and leading with it
+ * asked the reader to do the interpreting the app should be doing.
+ */
+export default function Results({ db, state, onViewReport, onNavigate, onSaveReflection }) {
   const { scores } = state
   const [showExplainer, setShowExplainer] = useState(!!state.preferences?.explainerDefaultOpen)
 
@@ -42,6 +62,20 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
   // generateReport() uses, so Results and the full report agree.
   const dominantBehaviours = (db.colours[scores.dominantColour].typical_behaviours || []).slice(0, 3)
   const secondaryBehaviours = (db.colours[scores.secondaryColour].typical_behaviours || []).slice(0, 2)
+
+  // The hero already *is* the ordinary-day state, so don't repeat it below.
+  const situations = buildSituations(scores, db).filter(s => s.key !== 'day_to_day')
+  const relational = buildRelational(scores, db)
+  const opposite = buildOppositeType(scores, db)
+  const lowEnergy = buildLowEnergy(scores, db)
+
+  const jumpLinks = [
+    ...situations,
+    ...relational,
+    (opposite || lowEnergy) && { key: 'friction', label: 'Where friction comes from', icon: '🧲' },
+    { key: 'reflect', label: 'Make it yours', icon: '✍️' },
+    { key: 'next', label: 'What to do about it', icon: '🎯' },
+  ].filter(Boolean)
 
   const balance = describeBalance(scores, db)
   const polarities = [
@@ -106,9 +140,48 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
         </div>
       )}
 
-      {/* Spectrum scores */}
+      <SituationJumpLinks situations={jumpLinks} idPrefix="results" heading="What's in here" />
+
+      {/* The same energy across situations — good day, overdone, under pressure. */}
+      <div className="mb-6">
+        <SituationSections situations={situations} idPrefix="results" />
+      </div>
+
+      {/* How you land on other people. */}
+      <div className="mb-6">
+        <SituationSections situations={relational} idPrefix="results" />
+      </div>
+
+      <div className="mb-6">
+        <FrictionSection opposite={opposite} lowEnergy={lowEnergy} id="results-friction" />
+      </div>
+
+      <div className="mb-6">
+        <ReflectionPrompts
+          db={db}
+          answers={state.reflectionAnswers}
+          onSave={onSaveReflection}
+          id="results-reflect"
+        />
+      </div>
+
+      <div className="mb-6">
+        <NextActions
+          db={db}
+          state={state}
+          onNavigate={onNavigate}
+          onViewReport={onViewReport}
+          id="results-next"
+        />
+      </div>
+
+      {/* The evidence. Demoted on purpose — it explains the reading above
+          rather than being the reading itself. */}
       <div className="card mb-6">
-        <h2 className="font-bold text-gray-900 text-lg mb-4">Spectrum Scores</h2>
+        <h2 className="font-bold text-gray-900 text-lg">The evidence behind this</h2>
+        <p className="text-sm text-gray-500 mt-1 mb-4">
+          How the four energies balanced out in your answers.
+        </p>
         {sorted.map((colourKey, i) => (
           <SpectrumBar
             key={colourKey}
@@ -119,6 +192,7 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
             label={db.colours[colourKey].display_name}
           />
         ))}
+        <p className="text-sm text-gray-600 mt-5 pt-4 border-t border-gray-100">{balance.guidance}</p>
       </div>
 
       {/* Explainability panel */}
@@ -236,22 +310,6 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
             </div>
           </div>
         )}
-      </div>
-
-      {/* CTA */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button
-          onClick={onViewReport}
-          className="btn-primary bg-gradient-to-r from-slate-700 to-slate-900 flex-1"
-        >
-          📄 Read Full Report
-        </button>
-        <button
-          onClick={() => onNavigate('challenges')}
-          className="btn-primary bg-gradient-to-r from-orange-700 to-red-600 flex-1"
-        >
-          ⚡ Start Challenges
-        </button>
       </div>
     </div>
   )

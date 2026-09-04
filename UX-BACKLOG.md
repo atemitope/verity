@@ -304,6 +304,77 @@ engineering terms shown directly to users.
 the (collapsed) explainability section where they're appropriate and expected;
 use plain language everywhere else.
 
+## P5 - Results as a report card
+
+### P5.1 Situational depth: the same energy across situations · **L** · ✅ shipped
+**Problem.** Results answered "what are your traits?" with a flat list. After
+32 questions a person is asking something more specific: how do I show up on a
+good day, and what happens to me under pressure?
+
+**Fix.** `src/situations.js` rearranges the *existing* db.json content into a
+narrative spine - good day (`strengths`), ordinary day (`typical_behaviours`),
+overdone (`blind_spots`), under pressure (`under_pressure`), where you thrive
+(`best_environment`). No new content: `blind_spots` genuinely is the good-day
+strength taken too far, which is how the instrument this app names as its
+comparator frames it. Shared by Results and Profile so they can't drift.
+
+### P5.2 Friction was attributed to the wrong colour · **M** · ✅ shipped
+**Problem.** "Where you'll feel friction" used the *lowest-scoring* colour.
+That's empirical, not structural - and the two often differ. A Cool Blue lead
+scoring lowest on Earth Green was being told friction lives with Earth Green,
+when the polarity axes in `interpretation_rules` put their opposite at
+Sunshine Yellow.
+
+**Fix.** `buildOppositeType()` derives the structural opposite by parsing the
+polarity metrics. Both are now shown, labelled as the different things they
+are. Pinned by tests, because this is silently wrong rather than visibly wrong.
+
+### P5.3 Actions asked for a click without showing the value · **M** · ✅ shipped
+**Problem.** Results ended in "⚡ Start Challenges" and "📄 Read Full Report" -
+two labels, no preview. The tailored content already existed (`nextSteps` and
+`experiment` from `generateReport()`), but only ever rendered inside the report.
+
+**Fix.** Show the actual first uncompleted challenge for the dominant colour,
+with its title and description, plus the three tailored next steps. The reader
+sees the value before deciding to act on it.
+
+### P5.4 Reflection prompts were authored and never rendered · **M** · ✅ shipped
+**Problem.** `reflection_prompts.post_results` holds three prompts written for
+this exact screen - the third asks for "one small change you can run for 14
+days", which is the experiment the challenges implement. Nothing rendered them.
+`gamification.reflectionsAnswered` was read by `checkBadges`/`checkTier` but
+never written, so the **Reflector** badge and the **Builder** tier were
+unreachable in the shipped app.
+
+**Fix.** The prompts are answerable inline on Results and stored in
+`state.reflectionAnswers`. The count is recomputed from stored answers rather
+than incremented, so editing an answer doesn't inflate it.
+
+### P5.5 Scores demoted below the reading · **S** · ✅ shipped
+**Problem.** "3.82 / 6" is evidence, not an insight, and leading with it asked
+the reader to do the interpreting the app should be doing.
+
+**Fix.** The bars moved below the narrative under "The evidence behind this".
+The explainability panel is untouched and still complete - this demotes, it
+does not delete.
+
+### P5.6 Close relationships vs strangers · **M** · ⛔ blocked on content
+**Problem.** A genuinely useful situational split - "this is how you
+communicate with people who know you well, this is how you come across to
+strangers" - and one users ask for.
+
+**Blocked, not deferred.** `db.json` has a single flat `communication_cues`
+list per colour. Splitting it by audience would mean *inventing* psychological
+claims rather than presenting authored ones, which the constraints below
+forbid. Needs new authored content in `db.json` first: `communication_close`
+and `communication_new` per colour. No code should ship before that content does.
+
+### P5.7 Quests are still inert · **S**
+**Problem.** `gamification.questProgress` is displayed on Achievements but
+never written, so all three quests permanently read 0/3. Same class of bug as
+P5.4, not fixed by it. `quest_communication` maps onto the communication
+challenges and could be driven by challenge completions.
+
 ---
 
 ## Explicitly not doing

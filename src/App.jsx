@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { loadState, saveState, clearState, createInitialState } from './storage'
 import { fetchMe, getServerState, putServerState, login as authLogin, logout as authLogout, deleteAccount as authDeleteAccount } from './auth'
 import { computeScores, generateReport } from './scoring'
-import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent, getLevelProgress } from './gamification'
+import { awardXP, checkBadges, checkTier, completeChallenge, saveReflection, getProgressPercent, getLevelProgress } from './gamification'
 import Header from './components/Header'
 import Logo from './components/Logo'
 import Profile from './components/Profile'
@@ -208,6 +208,15 @@ export default function App() {
     showToast('Challenge complete! +150 XP', 'success')
   }, [state, db, showToast])
 
+  const handleSaveReflection = useCallback((index, text) => {
+    const before = state.gamification.badges.length
+    const newState = saveReflection(state, db, index, text)
+    setState(newState)
+    if (newState.gamification.badges.length > before) {
+      showToast('🏅 Reflector badge earned', 'success')
+    }
+  }, [state, db, showToast])
+
   const handleLogin = useCallback(() => authLogin(), [])
 
   const handleLogout = useCallback(async () => {
@@ -299,6 +308,7 @@ export default function App() {
             state={state}
             onViewReport={() => { handleReportRead(); navigate('report') }}
             onNavigate={navigate}
+            onSaveReflection={handleSaveReflection}
           />
         )}
         {state.view === 'report' && state.report && (
