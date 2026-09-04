@@ -8,8 +8,10 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:auth": "VITE_DEV_AUTH=1 vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node src/scoring.test.js && node src/interpret.test.js && node src/domains.test.js"
   },
   "dependencies": {
     "jspdf": "^3.0.4",

@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { colourConfig } from '../colours'
+import { buildDomains, buildLowEnergy } from '../domains'
 import { getShareStatus, createShareLink, revokeShareLink } from '../share'
-
-const MOTION_OPTIONS = [
-  { value: 'system', label: 'System', hint: 'Follow your device setting' },
-  { value: 'reduced', label: 'Reduced', hint: 'Minimize motion everywhere' },
-  { value: 'full', label: 'Full', hint: 'Always show animations' },
-]
+import DomainSections from './DomainSections'
 
 const TIER_LABELS = {
   tier_explorer: '🧭 Explorer',
@@ -14,10 +10,13 @@ const TIER_LABELS = {
   tier_leader: '👑 Leader',
 }
 
-export default function Profile({ db, state, user, onUpdateState, onLogin, onLogout, onReset, onDeleteAccount, onNavigate }) {
-  const { preferences, scores, gamification } = state
-  const [confirmText, setConfirmText] = useState('')
-  const [deleting, setDeleting] = useState(false)
+/**
+ * A person's behavioural profile, browsable by the questions they actually
+ * ask ("How do I communicate?"). Account and app settings live in Settings —
+ * "profile" previously meant both, which made the real profile hard to find.
+ */
+export default function Profile({ db, state, user, onLogin, onNavigate }) {
+  const { scores, gamification } = state
   const [shareToken, setShareToken] = useState(null)
   const [shareLoading, setShareLoading] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -26,19 +25,6 @@ export default function Profile({ db, state, user, onUpdateState, onLogin, onLog
     if (!user) { setShareToken(null); return }
     getShareStatus().then(t => setShareToken(t))
   }, [user])
-
-  const setPreference = (key, value) => {
-    onUpdateState({ preferences: { ...preferences, [key]: value } })
-  }
-
-  const canDelete = user && confirmText.trim().toLowerCase() === (user.email || '').toLowerCase()
-
-  const handleDelete = async () => {
-    if (!canDelete) return
-    setDeleting(true)
-    await onDeleteAccount()
-    setDeleting(false)
-  }
 
   const shareUrl = shareToken ? `${window.location.origin}/share/${shareToken}` : null
 
@@ -63,100 +49,141 @@ export default function Profile({ db, state, user, onUpdateState, onLogin, onLog
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Clipboard permission denied or unavailable — the URL is still
-      // shown in the input for manual copy, so this is a soft failure.
+      // Clipboard unavailable — the URL is still selectable in the input.
     }
   }
 
-  const dominantCfg = scores ? colourConfig(scores.dominantColour) : null
+  // No assessment yet: there is no profile to show.
+  if (!scores) {
+    return (
+      <div className="animate-fade-in">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-4">Your profile</h1>
+        <div className="card text-center py-8">
+          <p className="text-gray-500 text-sm mb-4 max-w-sm mx-auto">
+            Take the assessment to see how you communicate, what you're like under pressure,
+            and how others can work with you.
+          </p>
+          <button onClick={() => onNavigate('quiz')} className="btn-primary bg-gray-900 hover:bg-gray-800 text-sm">
+            Take the assessment
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const dominantCfg = colourConfig(scores.dominantColour)
+  const domains = buildDomains(scores, db)
+  const lowEnergy = buildLowEnergy(scores, db)
 
   return (
     <div className="animate-fade-in space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight text-gray-900">Profile & settings</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-gray-900">Your profile</h1>
 
-      {/* Your assessment */}
-      {scores ? (
-        <div className={`card sheen relative overflow-hidden ring-0 bg-gradient-to-br ${dominantCfg.hero} ${dominantCfg.heroFg} shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
-          <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
-            {dominantCfg.emoji}
+      {/* Identity: behaviour first, colour as the label for it. */}
+      <div className={`card sheen relative overflow-hidden ring-0 bg-gradient-to-br ${dominantCfg.hero} ${dominantCfg.heroFg} shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
+        <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
+          {dominantCfg.emoji}
+        </div>
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-1`}>Your dominant energy</p>
+            <p className="text-2xl font-bold">{dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}</p>
+            <p className={`${dominantCfg.heroFgSoft} text-sm mt-1`}>{db.colours[scores.dominantColour].core_drive}</p>
           </div>
-          <div className="relative flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-1`}>Your dominant energy</p>
-              <p className="text-2xl font-bold">{dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}</p>
+          <div className="flex gap-2">
+            <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
+              <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Level</p>
+              <p className="font-semibold tnums">{gamification.level}</p>
             </div>
-            <div className="flex gap-2">
-              <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
-                <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Level</p>
-                <p className="font-semibold tnums">{gamification.level}</p>
-              </div>
-              <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
-                <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Badges</p>
-                <p className="font-semibold tnums">{gamification.badges.length}</p>
-              </div>
-              {gamification.tier !== 'none' && (
-                <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
-                  <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Tier</p>
-                  <p className="font-semibold">{TIER_LABELS[gamification.tier] || gamification.tier}</p>
-                </div>
-              )}
+            <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
+              <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Badges</p>
+              <p className="font-semibold tnums">{gamification.badges.length}</p>
             </div>
+            {gamification.tier !== 'none' && (
+              <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-3 py-2 text-center`}>
+                <p className={`${dominantCfg.heroFgSoft} text-[10px] mb-0.5`}>Tier</p>
+                <p className="font-semibold">{TIER_LABELS[gamification.tier] || gamification.tier}</p>
+              </div>
+            )}
           </div>
+        </div>
+        <div className="relative mt-4 flex flex-wrap gap-4">
           <button
             onClick={() => onNavigate('recap')}
-            className={`relative mt-4 text-xs font-medium ${dominantCfg.heroFgSoft} hover:opacity-80 transition-opacity underline underline-offset-2`}
+            className={`text-xs font-medium ${dominantCfg.heroFgSoft} hover:opacity-80 transition-opacity underline underline-offset-2`}
           >
             View your journey →
           </button>
-        </div>
-      ) : (
-        <div className="card text-center py-6">
-          <p className="text-gray-500 text-sm mb-3">Complete the questionnaire to see your profile here.</p>
-          <button onClick={() => onNavigate('quiz')} className="btn-primary bg-gray-900 hover:bg-gray-800 text-sm">
-            Take the Quiz
+          <button
+            onClick={() => onNavigate('report')}
+            className={`text-xs font-medium ${dominantCfg.heroFgSoft} hover:opacity-80 transition-opacity underline underline-offset-2`}
+          >
+            Read the full report →
           </button>
         </div>
-      )}
-
-      {/* Account */}
-      <div className="card">
-        <h2 className="font-bold text-gray-900 mb-4">Account</h2>
-        {user ? (
-          <div className="flex items-center gap-4">
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt=""
-                className="w-14 h-14 rounded-full ring-1 ring-gray-900/10"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-xl font-semibold text-gray-600">
-                {(user.name || user.email || '?').charAt(0).toUpperCase()}
-              </span>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-gray-900 truncate">{user.name || 'Signed in'}</p>
-              <p className="text-sm text-gray-500 truncate">{user.email}</p>
-              <p className="text-xs text-gray-400 mt-0.5">Signed in with Google</p>
-            </div>
-            <button onClick={onLogout} className="btn-ghost ring-1 ring-gray-900/10 shrink-0">
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <p className="text-sm text-gray-600 max-w-sm">
-              Sign in to sync your profile and progress across devices. Your preferences below work either way.
-            </p>
-            <button onClick={onLogin} className="btn-primary bg-gray-900 hover:bg-gray-800 shrink-0">
-              Sign in
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Share */}
+      {/* The behavioural domains — the substance of the profile. */}
+      <DomainSections domains={domains} idPrefix="profile" />
+
+      {/* A low score meant nothing on its own. The useful reading isn't
+          "you're bad at this" — it's "this is where you're least like other
+          people", which is what interpretation_rules warns friction comes from. */}
+      {lowEnergy && (
+        <section className="card">
+          <h2 className="font-bold text-gray-900 text-lg tracking-tight flex items-center gap-2.5">
+            <span aria-hidden="true" className="grid place-items-center w-9 h-9 rounded-xl bg-gray-100 text-base leading-none shrink-0">
+              🧲
+            </span>
+            Where you'll feel friction
+          </h2>
+          <p className="text-sm text-gray-500 mt-1.5 mb-4">
+            Your least-used energy is{' '}
+            <span className={`font-medium ${lowEnergy.cfg.text}`}>
+              {lowEnergy.cfg.emoji} {lowEnergy.colourName}
+            </span>
+            {typeof lowEnergy.score === 'number' && (
+              <span className="tnums"> ({lowEnergy.score.toFixed(2)}/6)</span>
+            )}
+            . That isn't a weakness — it's where your instincts differ most from
+            people who lead with it.
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                People who lead with it tend to
+              </p>
+              <ul className="space-y-2">
+                {lowEnergy.theirBehaviours.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span aria-hidden="true" className={`${lowEnergy.cfg.text} mt-0.5 shrink-0 text-xs`}>▸</span>
+                    <span className="text-sm text-gray-600 leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                Working well with them
+              </p>
+              <ul className="space-y-2">
+                {lowEnergy.workingWithThem.map((item, i) => (
+                  <li
+                    key={i}
+                    className={`flex items-start gap-2.5 p-3 rounded-xl ${lowEnergy.cfg.bgLight} ring-1 ring-gray-900/[0.03]`}
+                  >
+                    <span aria-hidden="true" className={`${lowEnergy.cfg.text} mt-0.5 shrink-0`}>▸</span>
+                    <span className="text-sm text-gray-700 leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Sharing this profile */}
       {user && (
         <div className="card">
           <h2 className="font-bold text-gray-900 mb-1">Share your profile</h2>
@@ -187,103 +214,14 @@ export default function Profile({ db, state, user, onUpdateState, onLogin, onLog
           ) : (
             <button
               onClick={handleCreateShare}
-              disabled={shareLoading || !scores}
+              disabled={shareLoading}
               className="btn-primary bg-gray-900 hover:bg-gray-800 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {shareLoading ? 'Creating…' : 'Create link'}
             </button>
           )}
-          {!scores && !shareToken && (
-            <p className="text-xs text-gray-400 mt-2">Complete the questionnaire first to have a profile to share.</p>
-          )}
         </div>
       )}
-
-      {/* Preferences */}
-      <div className="card">
-        <h2 className="font-bold text-gray-900 mb-1">Preferences</h2>
-        <p className="text-sm text-gray-500 mb-5">
-          Saved on this device{user ? ' and synced to your account' : ''}.
-        </p>
-
-        <div className="mb-5">
-          <p className="text-sm font-medium text-gray-800 mb-2">Motion</p>
-          <div className="grid grid-cols-3 gap-2">
-            {MOTION_OPTIONS.map(opt => {
-              const active = preferences.reducedMotion === opt.value
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => setPreference('reducedMotion', opt.value)}
-                  aria-pressed={active}
-                  className={`text-left px-3 py-2.5 rounded-xl text-sm transition-[background-color,box-shadow] duration-150
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
-                    ${active
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 ring-1 ring-gray-900/[0.04]'}`}
-                >
-                  <span className="block font-medium">{opt.label}</span>
-                  <span className={`block text-xs mt-0.5 ${active ? 'text-white/70' : 'text-gray-500'}`}>{opt.hint}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <label className="flex items-start gap-2.5 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={preferences.explainerDefaultOpen}
-            onChange={e => setPreference('explainerDefaultOpen', e.target.checked)}
-            className="mt-1"
-          />
-          <span className="text-sm text-gray-700">
-            Show detailed score explanations by default on the Results page
-          </span>
-        </label>
-      </div>
-
-      {/* Danger zone */}
-      <div className="card ring-1 ring-red-500/15">
-        <h2 className="font-bold text-red-700 mb-1">Danger zone</h2>
-        <p className="text-sm text-gray-500 mb-5">These actions can't be undone.</p>
-
-        <div className="flex items-center justify-between gap-4 py-3 border-t border-gray-100">
-          <div>
-            <p className="text-sm font-medium text-gray-800">Reset progress</p>
-            <p className="text-xs text-gray-500 mt-0.5">Clears quiz responses, scores, and gamification. Preferences stay as they are.</p>
-          </div>
-          <button onClick={() => { onReset(); onNavigate('home') }} className="btn-ghost ring-1 ring-gray-900/10 shrink-0 text-sm">
-            Reset
-          </button>
-        </div>
-
-        {user && (
-          <div className="py-3 border-t border-gray-100">
-            <p className="text-sm font-medium text-gray-800">Delete account</p>
-            <p className="text-xs text-gray-500 mt-0.5 mb-3">
-              Permanently deletes your account and everything saved to it. Type your email
-              (<span className="font-medium">{user.email}</span>) to confirm.
-            </p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <input
-                type="text"
-                value={confirmText}
-                onChange={e => setConfirmText(e.target.value)}
-                placeholder={user.email}
-                className="min-w-0 flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-              <button
-                onClick={handleDelete}
-                disabled={!canDelete || deleting}
-                className="btn-primary bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed shrink-0 text-sm px-4 py-2"
-              >
-                {deleting ? 'Deleting…' : 'Delete account'}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   )
 }

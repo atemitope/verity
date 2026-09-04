@@ -6,7 +6,9 @@ import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent,
 import Header from './components/Header'
 import Logo from './components/Logo'
 import Profile from './components/Profile'
+import Settings from './components/Settings'
 import Recap from './components/Recap'
+import DevBanner from './components/DevBanner'
 import { buildRecap, daysSince } from './recap'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
@@ -266,6 +268,8 @@ export default function App() {
 
   return (
     <div className="min-h-[100dvh] bg-[#f6f7f9] antialiased">
+      <DevBanner db={db} onSetState={setState} onNavigate={navigate} />
+
       <Header
         state={state}
         db={db}
@@ -329,6 +333,14 @@ export default function App() {
         {state.view === 'profile' && (
           <Profile
             db={db}
+            state={state}
+            user={user}
+            onLogin={handleLogin}
+            onNavigate={navigate}
+          />
+        )}
+        {state.view === 'settings' && (
+          <Settings
             state={state}
             user={user}
             onUpdateState={updateState}

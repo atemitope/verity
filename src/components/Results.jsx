@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { colourConfig } from '../colours'
+import { describeBalance, describePolarity } from '../interpret'
 
 export function SpectrumBar({ colour, score, maxScore, label, cfg, rank }) {
   const pct = (score / 6) * 100
@@ -37,31 +38,73 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
   const dominantCfg = colourConfig(scores.dominantColour)
   const secondaryCfg = colourConfig(scores.secondaryColour)
 
+  // Behaviour anchors lead the page. Same 3-dominant / 2-secondary blend
+  // generateReport() uses, so Results and the full report agree.
+  const dominantBehaviours = (db.colours[scores.dominantColour].typical_behaviours || []).slice(0, 3)
+  const secondaryBehaviours = (db.colours[scores.secondaryColour].typical_behaviours || []).slice(0, 2)
+
+  const balance = describeBalance(scores, db)
+  const polarities = [
+    { key: 'red_vs_green', value: scores.polarityRedGreen },
+    { key: 'blue_vs_yellow', value: scores.polarityBlueYellow },
+  ]
+    .map(p => ({ ...p, described: describePolarity(p.key, p.value, db) }))
+    .filter(p => p.described)
+
   return (
     <div className="animate-fade-in">
-      {/* Hero result */}
+      {/* Recognition — the behaviours lead; the colour names them below. */}
       <div className={`card sheen relative overflow-hidden mb-6 ring-0 bg-gradient-to-br ${dominantCfg.hero} ${dominantCfg.heroFg} shadow-[0_10px_30px_-8px_rgba(16,24,40,0.35)]`}>
         <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
           {dominantCfg.emoji}
         </div>
-        <div className="text-center py-4 relative">
-          <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2`}>Your dominant energy</p>
-          <h1 className="text-4xl sm:text-5xl font-bold mb-2 tracking-tight">
-            {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
-          </h1>
-          <p className={`${dominantCfg.heroFgSoft} text-sm mb-4 max-w-md mx-auto leading-relaxed`}>{db.colours[scores.dominantColour].core_drive}</p>
-          <div className="flex justify-center gap-3 text-sm">
-            <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-2`}>
-              <p className={`${dominantCfg.heroFgSoft} text-xs mb-0.5`}>Secondary</p>
-              <p className="font-semibold">{secondaryCfg.emoji} {db.colours[scores.secondaryColour].display_name}</p>
-            </div>
-            <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-2`}>
-              <p className={`${dominantCfg.heroFgSoft} text-xs mb-0.5`}>Confidence</p>
-              <p className="font-semibold tnums">{scores.confidence}%</p>
-            </div>
+        <div className="relative py-2">
+          <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-4`}>
+            What you'll probably recognise
+          </p>
+          <ul className="space-y-3 mb-6">
+            {dominantBehaviours.map((behaviour, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span aria-hidden="true" className={`${dominantCfg.heroFgSoft} mt-1 shrink-0 text-xs`}>▸</span>
+                <span className="text-lg sm:text-xl font-semibold leading-snug tracking-tight">{behaviour}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* The colour is introduced as the label for the pattern above. */}
+          <div className={`${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-3`}>
+            <p className="text-sm leading-relaxed">
+              Verity calls this pattern{' '}
+              <strong className="font-semibold">
+                {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
+              </strong>{' '}
+              energy — {db.colours[scores.dominantColour].core_drive}.
+            </p>
           </div>
         </div>
       </div>
+
+      {/* Secondary blend — mirrors generateReport()'s 3-dominant/2-secondary mix. */}
+      {secondaryBehaviours.length > 0 && (
+        <div className="card mb-6">
+          <h2 className="font-bold text-gray-900 mb-1">You also draw on</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Your supporting pattern, which Verity calls{' '}
+            <span className={`font-medium ${secondaryCfg.text}`}>
+              {secondaryCfg.emoji} {db.colours[scores.secondaryColour].display_name}
+            </span>{' '}
+            energy.
+          </p>
+          <ul className="space-y-2">
+            {secondaryBehaviours.map((behaviour, i) => (
+              <li key={i} className={`flex items-start gap-2.5 p-3 rounded-xl ${secondaryCfg.bgLight} ring-1 ring-gray-900/[0.03]`}>
+                <span aria-hidden="true" className={`${secondaryCfg.text} mt-0.5 shrink-0`}>▸</span>
+                <span className="text-sm text-gray-700 leading-relaxed">{behaviour}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Spectrum scores */}
       <div className="card mb-6">
@@ -126,8 +169,6 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
                   { label: 'Top gap', value: scores.topGap.toFixed(3) },
                   { label: 'Range', value: scores.range.toFixed(3) },
                   { label: 'Balance index', value: scores.balanceIndex.toFixed(3) },
-                  { label: 'Red–Green polarity', value: scores.polarityRedGreen.toFixed(3) },
-                  { label: 'Blue–Yellow polarity', value: scores.polarityBlueYellow.toFixed(3) },
                 ].map(m => (
                   <div key={m.label} className="bg-gray-50 rounded-lg p-2.5 ring-1 ring-gray-900/[0.03]">
                     <p className="text-xs text-gray-500">{m.label}</p>
@@ -136,6 +177,35 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
                 ))}
               </div>
             </div>
+
+            {/* Polarities — the same numbers, plus the poles db.json defines. */}
+            {polarities.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">Polarities</h3>
+                <div className="space-y-4">
+                  {polarities.map(({ key, described }) => (
+                    <div key={key}>
+                      <div className="flex justify-between items-baseline gap-3 mb-1.5 text-xs">
+                        <span className="text-gray-600 font-medium">{described.positivePole}</span>
+                        <span className="text-gray-500 tnums shrink-0">{described.value.toFixed(3)}</span>
+                        <span className="text-gray-600 font-medium text-right">{described.negativePole}</span>
+                      </div>
+                      <div className="relative h-2 bg-gray-100 rounded-full ring-1 ring-gray-900/[0.04]">
+                        {/* Midpoint reference */}
+                        <div className="absolute inset-y-0 left-1/2 w-px bg-gray-300" aria-hidden="true" />
+                        {/* percent runs 0–100 from the negative pole, so invert for display */}
+                        <div
+                          className="absolute top-1/2 w-3 h-3 rounded-full bg-gray-800 ring-2 ring-white -translate-y-1/2 -translate-x-1/2 transition-all duration-700 ease-out"
+                          style={{ left: `${100 - described.percent}%` }}
+                          role="img"
+                          aria-label={`${described.value.toFixed(2)} — leaning toward ${described.value >= 0 ? described.positivePole : described.negativePole}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Confidence */}
             <div>
@@ -159,16 +229,10 @@ export default function Results({ db, state, onViewReport, onNavigate }) {
               </p>
             </div>
 
-            {/* Interpretation rules */}
+            {/* Interpretation — classification and copy both come from db.json */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Balance Profile</h3>
-              <p className="text-sm text-gray-600">
-                {scores.balanceIndex >= 0.8
-                  ? 'Flat profile — your energies are broadly balanced. All four colours contribute roughly equally.'
-                  : scores.balanceIndex >= 0.5
-                  ? 'Moderately differentiated — some colours emerge more strongly than others.'
-                  : 'Strongly differentiated — clear dominant energy with significant contrasts.'}
-              </p>
+              <p className="text-sm text-gray-600">{balance.guidance}</p>
             </div>
           </div>
         )}

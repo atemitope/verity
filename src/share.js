@@ -3,10 +3,14 @@
 // public profile fetch deliberately does not, since anyone with the link
 // can view it without signing in.
 
+import { DEV_AUTH, devGetShareToken, devCreateShareToken, devRevokeShareToken } from './devMode';
+
 const opts = { credentials: 'include' };
 
 /** Returns the signed-in user's current share token, or null if none. */
 export async function getShareStatus() {
+  if (DEV_AUTH) return devGetShareToken();
+
   try {
     const res = await fetch('/api/share', opts);
     if (!res.ok) return null;
@@ -19,6 +23,8 @@ export async function getShareStatus() {
 
 /** Creates (or returns the existing) share token. Returns the token or null on failure. */
 export async function createShareLink() {
+  if (DEV_AUTH) return devCreateShareToken();
+
   try {
     const res = await fetch('/api/share', { method: 'POST', ...opts });
     if (!res.ok) return null;
@@ -31,6 +37,8 @@ export async function createShareLink() {
 
 /** Revokes the signed-in user's share link. Returns true on success. */
 export async function revokeShareLink() {
+  if (DEV_AUTH) return devRevokeShareToken();
+
   try {
     const res = await fetch('/api/share', { method: 'DELETE', ...opts });
     return res.ok;

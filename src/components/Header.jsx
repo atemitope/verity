@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Logo from './Logo'
 
+// Report is deliberately absent: Results vs Report is an internal distinction
+// (summary vs narrative), and the full report is reached from the prominent
+// "Read Full Report" button on Results rather than competing with it here.
 const NAV_ITEMS = [
   { key: 'home', label: 'Home', icon: '🏠' },
-  { key: 'quiz', label: 'Quiz', icon: '📝' },
+  { key: 'quiz', label: 'Assessment', icon: '📝' },
   { key: 'results', label: 'Results', icon: '📊' },
-  { key: 'report', label: 'Report', icon: '📄' },
   { key: 'challenges', label: 'Challenges', icon: '⚡' },
   { key: 'achievements', label: 'Achievements', icon: '🏆' },
+  { key: 'profile', label: 'Profile', icon: '👤' },
   { key: 'team', label: 'Team', icon: '👥' },
 ]
 
@@ -40,7 +43,21 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
     }
   }, [menuOpen])
 
-  const activeItem = NAV_ITEMS.find((i) => i.key === state.view) || NAV_ITEMS[0]
+  // Before the assessment is complete, hide destinations that don't work yet
+  // rather than greeting a first-time visitor with a row of padlocks.
+  const visibleItems = NAV_ITEMS.filter((i) => !isItemLocked(state, i.key))
+
+  // Views reachable without a nav entry, so the mobile trigger still names
+  // the page you're actually on.
+  const OFF_NAV_LABELS = {
+    report: { label: 'Full report', icon: '📄' },
+    settings: { label: 'Settings', icon: '⚙️' },
+    recap: { label: 'Your journey', icon: '✨' },
+  }
+  const activeItem =
+    NAV_ITEMS.find((i) => i.key === state.view) ||
+    OFF_NAV_LABELS[state.view] ||
+    NAV_ITEMS[0]
 
   const go = (key) => {
     if (isItemLocked(state, key)) return
@@ -94,13 +111,14 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
               </span>
             )}
 
-            {/* Profile entry point — same destination in both auth states, so
-                preferences stay reachable without signing in. Sign out lives
-                on the Profile page now, not here. */}
+            {/* Account/settings entry point — same destination in both auth
+                states, so preferences stay reachable without signing in. The
+                behavioural profile is a separate nav destination; sign out
+                lives in Settings. */}
             {user ? (
               <button
-                onClick={() => onNavigate('profile')}
-                aria-label="Open profile and settings"
+                onClick={() => onNavigate('settings')}
+                aria-label="Account and settings"
                 className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-lg text-xs font-medium text-gray-700
                   transition-colors duration-150 hover:bg-gray-100
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
@@ -125,7 +143,7 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
             ) : (
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => onNavigate('profile')}
+                  onClick={() => onNavigate('settings')}
                   aria-label="Settings"
                   className="text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 rounded-lg transition-colors
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
@@ -145,28 +163,24 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
 
         {/* Desktop nav — full row (all 7 items fit at >=sm). */}
         <nav className="hidden sm:flex gap-1 pb-2 -mb-px" aria-label="Primary">
-          {NAV_ITEMS.map(item => {
+          {visibleItems.map(item => {
             const isActive = state.view === item.key
-            const isLocked = isItemLocked(state, item.key)
             return (
               <button
                 key={item.key}
                 onClick={() => go(item.key)}
-                disabled={isLocked}
                 aria-current={isActive ? 'page' : undefined}
-                aria-label={isLocked ? `${item.label} (locked — complete the assessment first)` : item.label}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap
+                aria-label={item.label}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap cursor-pointer
                   transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-[0.97]
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
                   ${isActive
                     ? 'bg-gray-900 text-white shadow-[0_1px_2px_rgba(16,24,40,0.15),0_4px_10px_-3px_rgba(16,24,40,0.3)]'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'}
-                  ${isLocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
                 `}
               >
                 <span aria-hidden="true">{item.icon}</span>
                 <span>{item.label}</span>
-                {isLocked && <span className="text-[10px]" aria-hidden="true">🔒</span>}
               </button>
             )
           })}
@@ -217,28 +231,24 @@ export default function Header({ state, db, onNavigate, progressPercent, levelPr
               </button>
             </div>
             <nav className="flex flex-col gap-1" aria-label="Primary">
-              {NAV_ITEMS.map(item => {
+              {visibleItems.map(item => {
                 const isActive = state.view === item.key
-                const isLocked = isItemLocked(state, item.key)
                 return (
                   <button
                     key={item.key}
                     onClick={() => go(item.key)}
-                    disabled={isLocked}
                     aria-current={isActive ? 'page' : undefined}
-                    aria-label={isLocked ? `${item.label} (locked — complete the assessment first)` : item.label}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium text-left
+                    aria-label={item.label}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium text-left cursor-pointer
                       transition-[background-color,transform] duration-150 active:scale-[0.99]
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300
                       ${isActive
                         ? 'bg-gray-900 text-white'
                         : 'text-gray-700 hover:bg-gray-100'}
-                      ${isLocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
                     `}
                   >
                     <span className="text-lg leading-none" aria-hidden="true">{item.icon}</span>
                     <span>{item.label}</span>
-                    {isLocked && <span className="ml-auto text-xs" aria-hidden="true">🔒</span>}
                     {isActive && <span className="ml-auto text-xs" aria-hidden="true">●</span>}
                   </button>
                 )
