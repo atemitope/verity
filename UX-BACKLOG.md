@@ -1,8 +1,9 @@
 # UX backlog: from colour-first to behaviour-first
 
-> **Status.** Shipped: P0.1, P0.2, P0.3, P1.1, P1.2, P2.1, P2.2, P3.2, P4.1,
-> P4.2, and P4.3 in part. Still open: P3.1 in part — the Report's sections are
-> now question-phrased but still render as visually uniform cards.
+> **Status.** All thirteen items shipped, except P4.3 (a system-vocabulary
+> copy pass) which is partly done — the precise terms now sit inside the
+> collapsed explainability panel and the appendix, where they belong, but a
+> full sweep of remaining user-facing copy is still worthwhile.
 >
 > Two items changed shape once the code was opened: P0.3 turned out to be a
 > **correctness bug** rather than a copy fix, and P4.1 surfaced that "Profile"
@@ -212,7 +213,14 @@ which is often a stranger's first ever exposure to Verity.
 
 ## P3 - Making the report readable
 
-### P3.1 Nine near-identical bullet-list cards · **M** · ◑ partly shipped
+### P3.1 Nine near-identical bullet-list cards · **M** · ✅ shipped
+
+> Shipped as a contents list plus three group headings that mark what the
+> reader is actually doing — getting oriented, reading about themselves,
+> deciding what to act on, then checking the maths. The grouping encodes a
+> real shift in the content rather than decorating it, and the appendix is
+> visually de-emphasised as reference. Anchors use `scroll-mt` so a jump
+> clears the sticky header.
 **Problem.** Profile Summary, Strengths, Possible Challenges, Communication
 Tips, Under Pressure, How to Work With You, Next Steps, and the 14-Day
 Experiment are rendered as visually interchangeable card + bullet blocks. There
