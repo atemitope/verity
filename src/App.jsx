@@ -8,6 +8,7 @@ import Logo from './components/Logo'
 import Profile from './components/Profile'
 import Settings from './components/Settings'
 import Recap from './components/Recap'
+import DevBanner from './components/DevBanner'
 import { buildRecap, daysSince } from './recap'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
@@ -267,6 +268,8 @@ export default function App() {
 
   return (
     <div className="min-h-[100dvh] bg-[#f6f7f9] antialiased">
+      <DevBanner db={db} onSetState={setState} onNavigate={navigate} />
+
       <Header
         state={state}
         db={db}
