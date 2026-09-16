@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { loadState, saveState, clearState, createInitialState } from './storage'
 import { fetchMe, getServerState, putServerState, login as authLogin, logout as authLogout, deleteAccount as authDeleteAccount } from './auth'
 import { computeScores, generateReport } from './scoring'
-import { awardXP, checkBadges, checkTier, completeChallenge, getProgressPercent, getLevelProgress } from './gamification'
+import { awardXP, checkBadges, checkTier, completeChallenge, saveReflection, getProgressPercent, getLevelProgress } from './gamification'
 import Header from './components/Header'
 import Logo from './components/Logo'
 import Profile from './components/Profile'
+import Settings from './components/Settings'
 import Recap from './components/Recap'
+import DevBanner from './components/DevBanner'
 import { buildRecap, daysSince } from './recap'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
@@ -206,6 +208,15 @@ export default function App() {
     showToast('Challenge complete! +150 XP', 'success')
   }, [state, db, showToast])
 
+  const handleSaveReflection = useCallback((index, text) => {
+    const before = state.gamification.badges.length
+    const newState = saveReflection(state, db, index, text)
+    setState(newState)
+    if (newState.gamification.badges.length > before) {
+      showToast('🏅 Reflector badge earned', 'success')
+    }
+  }, [state, db, showToast])
+
   const handleLogin = useCallback(() => authLogin(), [])
 
   const handleLogout = useCallback(async () => {
@@ -266,6 +277,8 @@ export default function App() {
 
   return (
     <div className="min-h-[100dvh] bg-[#f6f7f9] antialiased">
+      <DevBanner db={db} onSetState={setState} onNavigate={navigate} />
+
       <Header
         state={state}
         db={db}
@@ -295,6 +308,7 @@ export default function App() {
             state={state}
             onViewReport={() => { handleReportRead(); navigate('report') }}
             onNavigate={navigate}
+            onSaveReflection={handleSaveReflection}
           />
         )}
         {state.view === 'report' && state.report && (
@@ -329,6 +343,14 @@ export default function App() {
         {state.view === 'profile' && (
           <Profile
             db={db}
+            state={state}
+            user={user}
+            onLogin={handleLogin}
+            onNavigate={navigate}
+          />
+        )}
+        {state.view === 'settings' && (
+          <Settings
             state={state}
             user={user}
             onUpdateState={updateState}

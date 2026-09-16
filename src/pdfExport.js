@@ -173,8 +173,54 @@ export function exportReportPdf(state, db) {
   paragraph(`Core drive (${domName}): ${domDrive}`, { size: 9.5, rgb: COLOURS.muted, lineGap: 2 })
   paragraph(`Supporting drive (${secName}): ${secDrive}`, { size: 9.5, rgb: COLOURS.muted, lineGap: 8 })
 
-  // ---- spectrum scores -----------------------------------------------------
-  sectionHeading('Spectrum Scores & Explainability')
+  // ---- strengths -----------------------------------------------------------
+  sectionHeading("What you're great at")
+  report.strengths.forEach((s) => bullet(s))
+  paragraph(`3 from ${domName}, 2 from ${secName}`, { size: 8.5, rgb: COLOURS.faint, lineGap: 6 })
+
+  // ---- challenges ----------------------------------------------------------
+  sectionHeading('What to watch for')
+  report.challenges.forEach((s) => bullet(s, COLOURS.muted))
+
+  // ---- communication tips --------------------------------------------------
+  sectionHeading('How you communicate')
+  report.commTips.forEach((s) => bullet(s, deepen(hexToRgb(secCfg.hex))))
+
+  // ---- under pressure ------------------------------------------------------
+  sectionHeading('How you are under pressure')
+  paragraph('Stress pattern', { size: 9.5, style: 'bold', lineGap: 1 })
+  paragraph(report.underPressure.pattern, { size: 10, rgb: COLOURS.muted, lineGap: 6 })
+  paragraph('Mitigation', { size: 9.5, style: 'bold', lineGap: 1 })
+  paragraph(report.underPressure.mitigation, { size: 10, rgb: COLOURS.muted, lineGap: 8 })
+
+  // ---- how to work with you ------------------------------------------------
+  sectionHeading('How others should work with you')
+  report.howToWorkWith.forEach((s) => bullet(s))
+
+  // ---- next steps ----------------------------------------------------------
+  sectionHeading('What to try next')
+  report.nextSteps.forEach((step) => {
+    const cfg = colourConfig(step.colour)
+    const nm = db.colours[step.colour].display_name
+    paragraph(nm, { size: 9.5, style: 'bold', rgb: deepen(hexToRgb(cfg.hex)), lineGap: 1 })
+    paragraph(step.text, { size: 10, rgb: COLOURS.ink, lineGap: 7 })
+  })
+
+  // ---- 14-day experiment ---------------------------------------------------
+  sectionHeading('14-Day Experiment')
+  paragraph(report.experiment.title, { size: 11, style: 'bold', rgb: accent, lineGap: 3 })
+  paragraph(report.experiment.description, { size: 10, rgb: COLOURS.ink, lineGap: 6 })
+  const prompts = (db.reflection_prompts && db.reflection_prompts.weekly_checkin) || []
+  if (prompts.length) {
+    paragraph('Daily check-in prompts:', { size: 9, style: 'bold', rgb: COLOURS.muted, lineGap: 3 })
+    prompts.forEach((p) => paragraph(`•  ${p}`, { size: 9, rgb: COLOURS.muted, lineGap: 1, indent: 6 }))
+    y += 4
+  }
+
+  // ---- appendix: scoring transparency --------------------------------------
+  // Spec section 11. Kept at the end so the narrative isn't interrupted by
+  // maths, matching the on-screen report.
+  sectionHeading('Appendix: scoring transparency')
   db.scoring.colour_keys.forEach((c) => {
     const cfg = colourConfig(c)
     const rgb = hexToRgb(cfg.hex)
@@ -206,50 +252,6 @@ export function exportReportPdf(state, db) {
     `Confidence: ${scores.confidence}%  ·  Balance index: ${scores.balanceIndex.toFixed(2)}  ·  Top gap: ${scores.topGap.toFixed(2)}`,
     { size: 8.5, rgb: COLOURS.faint, lineGap: 8 }
   )
-
-  // ---- strengths -----------------------------------------------------------
-  sectionHeading('Strengths')
-  report.strengths.forEach((s) => bullet(s))
-  paragraph(`3 from ${domName}, 2 from ${secName}`, { size: 8.5, rgb: COLOURS.faint, lineGap: 6 })
-
-  // ---- challenges ----------------------------------------------------------
-  sectionHeading('Possible Challenges')
-  report.challenges.forEach((s) => bullet(s, COLOURS.muted))
-
-  // ---- communication tips --------------------------------------------------
-  sectionHeading('Communication Tips')
-  report.commTips.forEach((s) => bullet(s, deepen(hexToRgb(secCfg.hex))))
-
-  // ---- under pressure ------------------------------------------------------
-  sectionHeading('Under Pressure')
-  paragraph('Stress pattern', { size: 9.5, style: 'bold', lineGap: 1 })
-  paragraph(report.underPressure.pattern, { size: 10, rgb: COLOURS.muted, lineGap: 6 })
-  paragraph('Mitigation', { size: 9.5, style: 'bold', lineGap: 1 })
-  paragraph(report.underPressure.mitigation, { size: 10, rgb: COLOURS.muted, lineGap: 8 })
-
-  // ---- how to work with you ------------------------------------------------
-  sectionHeading('How to Work With You')
-  report.howToWorkWith.forEach((s) => bullet(s))
-
-  // ---- next steps ----------------------------------------------------------
-  sectionHeading('Next Steps')
-  report.nextSteps.forEach((step) => {
-    const cfg = colourConfig(step.colour)
-    const nm = db.colours[step.colour].display_name
-    paragraph(nm, { size: 9.5, style: 'bold', rgb: deepen(hexToRgb(cfg.hex)), lineGap: 1 })
-    paragraph(step.text, { size: 10, rgb: COLOURS.ink, lineGap: 7 })
-  })
-
-  // ---- 14-day experiment ---------------------------------------------------
-  sectionHeading('14-Day Experiment')
-  paragraph(report.experiment.title, { size: 11, style: 'bold', rgb: accent, lineGap: 3 })
-  paragraph(report.experiment.description, { size: 10, rgb: COLOURS.ink, lineGap: 6 })
-  const prompts = (db.reflection_prompts && db.reflection_prompts.weekly_checkin) || []
-  if (prompts.length) {
-    paragraph('Daily check-in prompts:', { size: 9, style: 'bold', rgb: COLOURS.muted, lineGap: 3 })
-    prompts.forEach((p) => paragraph(`•  ${p}`, { size: 9, rgb: COLOURS.muted, lineGap: 1, indent: 6 }))
-    y += 4
-  }
 
   // ---- disclaimer ----------------------------------------------------------
   ensureSpace(70)

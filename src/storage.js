@@ -38,6 +38,7 @@ export function createInitialState() {
       reflectionsAnswered: 0,
       experimentLog: [],
     },
+    reflectionAnswers: {}, // index -> the user's own words, from reflection_prompts.post_results
     teamMembers: [],
     teamReport: null,
     assessmentComplete: false,

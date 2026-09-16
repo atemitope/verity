@@ -49,6 +49,7 @@ export default function SharedProfile({ token }) {
   const sorted = scores.sortedColours
   const dominantCfg = colourConfig(scores.dominantColour)
   const secondaryCfg = colourConfig(scores.secondaryColour)
+  const dominantBehaviours = (db.colours[scores.dominantColour].typical_behaviours || []).slice(0, 3)
 
   return (
     <div className="min-h-[100dvh] bg-[#f6f7f9] antialiased">
@@ -87,13 +88,27 @@ export default function SharedProfile({ token }) {
               <div className="absolute -right-6 -bottom-8 text-[9rem] leading-none opacity-15 select-none" aria-hidden="true">
                 {dominantCfg.emoji}
               </div>
-              <div className="text-center py-4 relative">
-                <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-2`}>Dominant energy</p>
-                <h1 className="text-4xl sm:text-5xl font-bold mb-2 tracking-tight">
-                  {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
-                </h1>
-                <p className={`${dominantCfg.heroFgSoft} text-sm mb-4 max-w-md mx-auto leading-relaxed`}>
-                  {db.colours[scores.dominantColour].core_drive}
+              {/* Behaviour leads here too. A share link is often a stranger's
+                  first ever contact with Verity, so "Sunshine Yellow" alone
+                  would mean nothing to them. */}
+              <div className="py-2 relative">
+                <p className={`${dominantCfg.heroFgSoft} text-xs uppercase tracking-[0.15em] mb-4`}>
+                  {name ? `How ${name} tends to work` : 'How they tend to work'}
+                </p>
+                <ul className="space-y-3 mb-6">
+                  {dominantBehaviours.map((behaviour, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span aria-hidden="true" className={`${dominantCfg.heroFgSoft} mt-1 shrink-0 text-xs`}>▸</span>
+                      <span className="text-lg font-semibold leading-snug tracking-tight">{behaviour}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className={`${dominantCfg.heroFgSoft} text-sm mb-4 leading-relaxed`}>
+                  Verity calls this pattern{' '}
+                  <strong className="font-semibold">
+                    {dominantCfg.emoji} {db.colours[scores.dominantColour].display_name}
+                  </strong>{' '}
+                  energy — {db.colours[scores.dominantColour].core_drive}.
                 </p>
                 <div className={`inline-block ${dominantCfg.heroChip} backdrop-blur-sm ring-1 rounded-xl px-4 py-2`}>
                   <p className={`${dominantCfg.heroFgSoft} text-xs mb-0.5`}>Secondary</p>

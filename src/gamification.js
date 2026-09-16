@@ -92,6 +92,28 @@ export function completeChallenge(state, db, challengeId, outcomeNote) {
   return newState;
 }
 
+/**
+ * Record an answer to one of the post-results reflection prompts.
+ *
+ * reflectionsAnswered is recomputed from the stored answers rather than
+ * incremented, so editing an existing answer doesn't inflate the count and
+ * hand out the Reflector badge for one prompt answered three times.
+ */
+export function saveReflection(state, db, index, text) {
+  const answers = { ...(state.reflectionAnswers || {}), [index]: text };
+  const answeredCount = Object.values(answers)
+    .filter(v => typeof v === 'string' && v.trim().length > 0).length;
+
+  let newState = {
+    ...state,
+    reflectionAnswers: answers,
+    gamification: { ...state.gamification, reflectionsAnswered: answeredCount },
+  };
+  newState = checkBadges(newState, db);
+  newState = checkTier(newState, db);
+  return newState;
+}
+
 export function getProgressPercent(state) {
   const items = [];
   if (state.assessmentComplete) items.push(1);
