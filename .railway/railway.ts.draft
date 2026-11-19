@@ -1,0 +1,22 @@
+import { defineRailway, postgres, preserve, project, service, volume } from "railway/iac";
+
+export default defineRailway(() => {
+  const Postgres = postgres("Postgres", { region: "us-east4-eqdc4a" });
+  Postgres.networking = { privateNetworkEndpoint: "postgres" };
+  const postgresVolume = volume("postgres-volume", { alerts: { usage: { "100": {}, "80": {}, "95": {} } }, allowOnlineResize: true, region: "us-east4-eqdc4a", sizeMB: 5000 });
+  const verityApp = service("verity-app", {
+    // These two lived only in railway.json (Config as Code). The live service
+    // carried no build/start command of its own, so when CaC stops being read
+    // on 2026-12-01 the backend would lose `node server/index.js` and fall
+    // back to builder auto-detection. Carried over here deliberately.
+    build: "npm install && npm run build && npm install --prefix server",
+    start: "node server/index.js",
+    replicas: { "us-east4-eqdc4a": 1 },
+    domains: ["www.getverity.site"],
+    env: { APP_URL: preserve(), DATABASE_URL: preserve(), GOOGLE_CLIENT_ID: preserve(), GOOGLE_CLIENT_SECRET: preserve(), GOOGLE_REDIRECT_URI: preserve(), NODE_ENV: preserve(), SESSION_SECRET: preserve() },
+  });
+
+  return project("verity", {
+    resources: [verityApp, Postgres, postgresVolume],
+  });
+});
