@@ -230,13 +230,16 @@ navigate back to a specific part later.
 **Fix.** Differentiate the domains visually and structurally. Give the report a
 contents/jump affordance so it's returnable-to, not just a single long scroll.
 
-### P3.2 Technical scores interrupt the narrative in position 2 · **S**
+### P3.2 Technical scores interrupt the narrative in position 2 · **S** · ✅ shipped
 **Problem.** "Spectrum Scores & Explainability" (`19 / 36 pts → 3.18/6`) sits
 directly between Profile Summary and Strengths, breaking the story with maths
 at the earliest possible moment.
 
 **Fix.** Move it to the end of the report as an appendix. Explainability is
 preserved - it's just no longer the second thing you read about yourself.
+
+Shipped in `01e92f0`: `appendix` is last in both `CONTENTS` and the render in
+`Report.jsx`. The status line here lagged the code.
 
 ---
 

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      # The suites are plain node scripts (no test framework) and assert
+      # against public/db.json, so they catch content/code drift too.
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Two independent gates keep the dev auth stub out of production
+      # (import.meta.env.DEV, and an explicit VITE_DEV_AUTH=1). This asserts
+      # the result rather than trusting it: a fake session must never be
+      # reachable in a shipped bundle.
+      - name: Dev auth stub must not reach the bundle
+        run: |
+          for needle in 'dev@localhost' 'DEV MODE' 'buildDemoState' 'VITE_DEV_AUTH'; do
+            if grep -rqF "$needle" dist/; then
+              echo "::error::dev auth artefact '$needle' leaked into dist/"
+              exit 1
+            fi
+          done
+          echo "dev auth stub absent from dist/"

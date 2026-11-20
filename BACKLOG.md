@@ -7,6 +7,67 @@ punted; remove it once it's done (check the commit/PR that closed it).
 
 ## Deployment & access
 
+- **⚠ Railway has no GitHub repo connected, so nothing auto-deploys.**
+  Confirmed 2026-11-19: `service.repoTriggers` is empty for `verity-app`.
+  Every deploy to date was a manual `railway up`, and the last one was
+  **2026-09-01** - so everything merged after that (all of PR #6, the whole
+  behaviour-first arc) sat unshipped for over two months while `main` looked
+  healthy. Netlify *does* auto-deploy from `main` and was serving the current
+  bundle, but it is static-only (`/api/auth/me` → 404), so the live site with
+  a working backend was the stale one. Fix properly by connecting the repo in
+  the Railway dashboard (Service → Settings → Source); until then every
+  release needs `railway up --service verity-app` by hand.
+- **⚠ `railway.json` stops working 2026-12-01.** Config-as-Code is deprecated
+  in favour of `.railway/railway.ts`. `railway config migrate` exists but its
+  dry run is **not safe to apply as-is**: it derives the service name from the
+  directory (`colour-spectrum-profile`) rather than the real service
+  (`verity-app`), and silently drops `restartPolicyType: ON_FAILURE` /
+  `restartPolicyMaxRetries: 3`.
+
+  **A correct draft is already prepared at `.railway/railway.ts.draft`** -
+  generated with `railway config pull` (from live state, so the service name,
+  project, Postgres, volume and `www.getverity.site` are all right, and
+  secrets stay as `preserve()` rather than being decrypted). The `.draft`
+  suffix is deliberate: the CLI must not read it until it has been validated,
+  or an unvalidated file could capture a `railway up` that would otherwise
+  succeed.
+
+  Note what `config pull` *did not* carry over: the live service has **no
+  build or start command of its own** - both live only in `railway.json`. So
+  the 2026-12-01 cutoff is not cosmetic. Left unmigrated, the service loses
+  `node server/index.js` and falls back to builder auto-detection. Those two
+  lines were added to the draft by hand.
+
+  To finish (in this order, and not while a deploy is in flight):
+
+  ```bash
+  npm install --save-dev railway        # the IaC DSL; config plan needs it
+  mv .railway/railway.ts.draft .railway/railway.ts
+  railway config plan                   # preview only - must be a no-op
+  railway config apply
+  ```
+
+  `railway config plan` must come out as no behavioural change. If it proposes
+  creating a service, recreating one, or dropping the domain, stop - that is
+  the rename trap above.
+
+  Still unresolved: the restart policy (`ON_FAILURE`, 3 retries) has no
+  documented equivalent in the IaC DSL and is absent from the live config, so
+  it may simply be lost. Worth confirming against the CLI reference before
+  applying.
+- **Apex domain still dead.** `www.getverity.site` resolves (CNAME →
+  `lrgjh13l.up.railway.app`) and serves the app. `getverity.site` has **no DNS
+  record at all** - no A, no CNAME - so the bare domain fails to connect.
+  Either add the apex record the registrar supports (ALIAS/ANAME if offered)
+  or a redirect from apex → www.
+- **Two hosts serve this app.** Netlify (`spontaneous-croissant-e01c6b`)
+  auto-deploys `main` but has no backend; Railway serves the real app. Worth a
+  deliberate call on whether Netlify stays as a preview-only target or gets
+  retired, since right now it can show a *newer* UI than production.
+
+**Original notes (still open unless marked):**
+
+
 - **Add Google OAuth test users, or complete full app verification.** The
   consent screen is in Testing mode (Google Cloud project `insights-501414`,
   client "CSP Web") - only allow-listed test users can sign in today (1/100
